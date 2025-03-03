@@ -1,0 +1,166 @@
+// =============================================================================
+// COMPONENT GRID LAYOUTS
+// =============================================================================
+//
+// This file defines reusable component-level grid layouts and containers for
+// the Interaction Management System's user interface. These grid components 
+// complement the application's core layout system by providing specialized
+// patterns for UI elements like form layouts, card grids, and data presentation.
+//
+// =============================================================================
+
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+// =============================================================================
+// GENERAL COMPONENT GRIDS
+// =============================================================================
+
+// Basic grid container for component layouts
+.component-grid {
+  display: grid;
+  gap: $spacing-4;
+  width: 100%;
+}
+
+// Two-column grid layout with responsive adjustments
+.component-grid-cols-2 {
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+// Three-column grid layout with responsive adjustments
+.component-grid-cols-3 {
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// Four-column grid layout with responsive adjustments
+.component-grid-cols-4 {
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// =============================================================================
+// FORM GRID LAYOUTS
+// =============================================================================
+
+// Specialized grid for form layouts with label/input alignment
+.form-grid {
+  display: grid;
+  gap: $spacing-4;
+  grid-template-columns: 1fr;
+  
+  @include respond-to(md) {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+// Full-width element within a form grid
+.form-grid-full {
+  grid-column: 1 / -1;
+}
+
+// =============================================================================
+// CARD AND CONTENT GRID LAYOUTS
+// =============================================================================
+
+// Grid layout for card components
+.card-grid {
+  display: grid;
+  gap: $spacing-4;
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// =============================================================================
+// SPECIFIC COMPONENT LAYOUTS
+// =============================================================================
+
+// Grid layout for the Interaction Finder component
+.finder-grid {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: $spacing-4;
+  height: 100%;
+}
+
+// Grid layout for filter panels in the Finder component
+.filter-grid {
+  display: grid;
+  gap: $spacing-3;
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+// =============================================================================
+// ADAPTIVE GRID LAYOUTS
+// =============================================================================
+
+// Responsive grid that automatically adjusts columns based on available space
+.auto-fit-grid {
+  display: grid;
+  gap: $spacing-4;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
+// Two-column layout for content with sidebar
+.two-column-layout {
+  display: grid;
+  gap: $spacing-4;
+  grid-template-columns: 1fr;
+  
+  @include respond-to(lg) {
+    grid-template-columns: 3fr 1fr;
+  }
+}
+
+// =============================================================================
+// UTILITY GRID LAYOUTS
+// =============================================================================
+
+// Grid for action buttons in forms and cards
+.action-grid {
+  display: grid;
+  gap: $spacing-2;
+  grid-template-columns: repeat(auto-fit, minmax(100px, max-content));
+  justify-content: end;
+}
+
+// Grid for vertically and horizontally centered content
+.centered-content {
+  display: grid;
+  place-items: center;
+  min-height: 100%;
+}
