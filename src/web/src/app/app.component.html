@@ -1,0 +1,23 @@
+<div class="app-container">
+  <!-- Fullscreen loading indicator shown during app initialization -->
+  <app-loading-indicator 
+    *ngIf="isLoading" 
+    [fullscreen]="true" 
+    [text]="'Loading application...'">
+  </app-loading-indicator>
+
+  <!-- Header shown only when authenticated -->
+  <header *ngIf="isAuthenticated">
+    <app-header></app-header>
+  </header>
+
+  <!-- Main content area with router outlet -->
+  <main class="main-content">
+    <router-outlet></router-outlet>
+  </main>
+
+  <!-- Footer shown only when authenticated -->
+  <footer *ngIf="isAuthenticated">
+    <app-footer></app-footer>
+  </footer>
+</div>
