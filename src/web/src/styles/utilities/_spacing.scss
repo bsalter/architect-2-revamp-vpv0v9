@@ -1,0 +1,258 @@
+// =============================================================================
+// SPACING UTILITIES
+// =============================================================================
+//
+// This file provides spacing-related utility classes for margin, padding, gap,
+// and other spacing properties. These utilities complement TailwindCSS with
+// additional functionality specific to the Interaction Management System.
+//
+// The spacing scale is based on a 4px (0.25rem) increment system, providing
+// consistent spacing throughout the application.
+//
+// =============================================================================
+
+// Import spacing variables and responsive mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// MARGIN UTILITIES
+// =============================================================================
+
+// All sides margin
+.m-0 { margin: $spacing-0; }
+.m-1 { margin: $spacing-1; }
+.m-2 { margin: $spacing-2; }
+.m-3 { margin: $spacing-3; }
+.m-4 { margin: $spacing-4; }
+.m-5 { margin: $spacing-5; }
+.m-6 { margin: $spacing-6; }
+.m-8 { margin: $spacing-8; }
+.m-10 { margin: $spacing-10; }
+.m-12 { margin: $spacing-12; }
+.m-16 { margin: $spacing-16; }
+.m-20 { margin: $spacing-20; }
+.m-auto { margin: auto; }
+
+// Horizontal margin (left and right)
+.mx-0 { margin-left: $spacing-0; margin-right: $spacing-0; }
+.mx-1 { margin-left: $spacing-1; margin-right: $spacing-1; }
+.mx-2 { margin-left: $spacing-2; margin-right: $spacing-2; }
+.mx-3 { margin-left: $spacing-3; margin-right: $spacing-3; }
+.mx-4 { margin-left: $spacing-4; margin-right: $spacing-4; }
+.mx-6 { margin-left: $spacing-6; margin-right: $spacing-6; }
+.mx-8 { margin-left: $spacing-8; margin-right: $spacing-8; }
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+// Vertical margin (top and bottom)
+.my-0 { margin-top: $spacing-0; margin-bottom: $spacing-0; }
+.my-1 { margin-top: $spacing-1; margin-bottom: $spacing-1; }
+.my-2 { margin-top: $spacing-2; margin-bottom: $spacing-2; }
+.my-3 { margin-top: $spacing-3; margin-bottom: $spacing-3; }
+.my-4 { margin-top: $spacing-4; margin-bottom: $spacing-4; }
+.my-6 { margin-top: $spacing-6; margin-bottom: $spacing-6; }
+.my-8 { margin-top: $spacing-8; margin-bottom: $spacing-8; }
+.my-auto { margin-top: auto; margin-bottom: auto; }
+
+// Top margin
+.mt-0 { margin-top: $spacing-0; }
+.mt-1 { margin-top: $spacing-1; }
+.mt-2 { margin-top: $spacing-2; }
+.mt-3 { margin-top: $spacing-3; }
+.mt-4 { margin-top: $spacing-4; }
+.mt-6 { margin-top: $spacing-6; }
+.mt-8 { margin-top: $spacing-8; }
+.mt-auto { margin-top: auto; }
+
+// Right margin
+.mr-0 { margin-right: $spacing-0; }
+.mr-1 { margin-right: $spacing-1; }
+.mr-2 { margin-right: $spacing-2; }
+.mr-3 { margin-right: $spacing-3; }
+.mr-4 { margin-right: $spacing-4; }
+.mr-auto { margin-right: auto; }
+
+// Bottom margin
+.mb-0 { margin-bottom: $spacing-0; }
+.mb-1 { margin-bottom: $spacing-1; }
+.mb-2 { margin-bottom: $spacing-2; }
+.mb-3 { margin-bottom: $spacing-3; }
+.mb-4 { margin-bottom: $spacing-4; }
+.mb-6 { margin-bottom: $spacing-6; }
+.mb-8 { margin-bottom: $spacing-8; }
+.mb-auto { margin-bottom: auto; }
+
+// Left margin
+.ml-0 { margin-left: $spacing-0; }
+.ml-1 { margin-left: $spacing-1; }
+.ml-2 { margin-left: $spacing-2; }
+.ml-3 { margin-left: $spacing-3; }
+.ml-4 { margin-left: $spacing-4; }
+.ml-auto { margin-left: auto; }
+
+// =============================================================================
+// PADDING UTILITIES
+// =============================================================================
+
+// All sides padding
+.p-0 { padding: $spacing-0; }
+.p-1 { padding: $spacing-1; }
+.p-2 { padding: $spacing-2; }
+.p-3 { padding: $spacing-3; }
+.p-4 { padding: $spacing-4; }
+.p-5 { padding: $spacing-5; }
+.p-6 { padding: $spacing-6; }
+.p-8 { padding: $spacing-8; }
+
+// Horizontal padding (left and right)
+.px-0 { padding-left: $spacing-0; padding-right: $spacing-0; }
+.px-1 { padding-left: $spacing-1; padding-right: $spacing-1; }
+.px-2 { padding-left: $spacing-2; padding-right: $spacing-2; }
+.px-3 { padding-left: $spacing-3; padding-right: $spacing-3; }
+.px-4 { padding-left: $spacing-4; padding-right: $spacing-4; }
+.px-6 { padding-left: $spacing-6; padding-right: $spacing-6; }
+
+// Vertical padding (top and bottom)
+.py-0 { padding-top: $spacing-0; padding-bottom: $spacing-0; }
+.py-1 { padding-top: $spacing-1; padding-bottom: $spacing-1; }
+.py-2 { padding-top: $spacing-2; padding-bottom: $spacing-2; }
+.py-3 { padding-top: $spacing-3; padding-bottom: $spacing-3; }
+.py-4 { padding-top: $spacing-4; padding-bottom: $spacing-4; }
+.py-6 { padding-top: $spacing-6; padding-bottom: $spacing-6; }
+
+// Top padding
+.pt-0 { padding-top: $spacing-0; }
+.pt-1 { padding-top: $spacing-1; }
+.pt-2 { padding-top: $spacing-2; }
+.pt-3 { padding-top: $spacing-3; }
+.pt-4 { padding-top: $spacing-4; }
+
+// Right padding
+.pr-0 { padding-right: $spacing-0; }
+.pr-1 { padding-right: $spacing-1; }
+.pr-2 { padding-right: $spacing-2; }
+.pr-3 { padding-right: $spacing-3; }
+.pr-4 { padding-right: $spacing-4; }
+
+// Bottom padding
+.pb-0 { padding-bottom: $spacing-0; }
+.pb-1 { padding-bottom: $spacing-1; }
+.pb-2 { padding-bottom: $spacing-2; }
+.pb-3 { padding-bottom: $spacing-3; }
+.pb-4 { padding-bottom: $spacing-4; }
+
+// Left padding
+.pl-0 { padding-left: $spacing-0; }
+.pl-1 { padding-left: $spacing-1; }
+.pl-2 { padding-left: $spacing-2; }
+.pl-3 { padding-left: $spacing-3; }
+.pl-4 { padding-left: $spacing-4; }
+
+// =============================================================================
+// GAP UTILITIES
+// =============================================================================
+
+// Gap for flex and grid layouts
+.gap-0 { gap: $spacing-0; }
+.gap-1 { gap: $spacing-1; }
+.gap-2 { gap: $spacing-2; }
+.gap-3 { gap: $spacing-3; }
+.gap-4 { gap: $spacing-4; }
+.gap-6 { gap: $spacing-6; }
+.gap-8 { gap: $spacing-8; }
+
+// =============================================================================
+// COMPONENT-SPECIFIC SPACING
+// =============================================================================
+
+// Form-related spacing
+.form-group-spacing {
+  margin-bottom: $spacing-4;
+}
+
+// Section spacing
+.section-spacing {
+  margin-bottom: $spacing-8;
+}
+
+// Card component spacing
+.card-spacing {
+  padding: $spacing-4;
+}
+
+// Finder interface spacing
+.finder-filter-spacing {
+  margin-right: $spacing-3;
+  margin-bottom: $spacing-3;
+}
+
+.finder-header-spacing {
+  margin-bottom: $spacing-4;
+}
+
+// =============================================================================
+// RESPONSIVE SPACING UTILITIES
+// =============================================================================
+
+// Generate responsive variants for spacing utilities at each breakpoint
+@each $breakpoint in map-keys($breakpoints) {
+  @if $breakpoint != 'xs' {
+    @include respond-to($breakpoint) {
+      // Responsive margin utilities
+      .#{$breakpoint}\:m-0 { margin: $spacing-0; }
+      .#{$breakpoint}\:m-1 { margin: $spacing-1; }
+      .#{$breakpoint}\:m-2 { margin: $spacing-2; }
+      .#{$breakpoint}\:m-3 { margin: $spacing-3; }
+      .#{$breakpoint}\:m-4 { margin: $spacing-4; }
+      .#{$breakpoint}\:m-6 { margin: $spacing-6; }
+      .#{$breakpoint}\:m-8 { margin: $spacing-8; }
+      .#{$breakpoint}\:m-auto { margin: auto; }
+      
+      // Responsive horizontal margin
+      .#{$breakpoint}\:mx-0 { margin-left: $spacing-0; margin-right: $spacing-0; }
+      .#{$breakpoint}\:mx-2 { margin-left: $spacing-2; margin-right: $spacing-2; }
+      .#{$breakpoint}\:mx-4 { margin-left: $spacing-4; margin-right: $spacing-4; }
+      .#{$breakpoint}\:mx-auto { margin-left: auto; margin-right: auto; }
+      
+      // Responsive vertical margin
+      .#{$breakpoint}\:my-0 { margin-top: $spacing-0; margin-bottom: $spacing-0; }
+      .#{$breakpoint}\:my-2 { margin-top: $spacing-2; margin-bottom: $spacing-2; }
+      .#{$breakpoint}\:my-4 { margin-top: $spacing-4; margin-bottom: $spacing-4; }
+      .#{$breakpoint}\:my-8 { margin-top: $spacing-8; margin-bottom: $spacing-8; }
+      
+      // Responsive directional margins
+      .#{$breakpoint}\:mt-0 { margin-top: $spacing-0; }
+      .#{$breakpoint}\:mt-2 { margin-top: $spacing-2; }
+      .#{$breakpoint}\:mt-4 { margin-top: $spacing-4; }
+      .#{$breakpoint}\:mt-6 { margin-top: $spacing-6; }
+      
+      .#{$breakpoint}\:mb-0 { margin-bottom: $spacing-0; }
+      .#{$breakpoint}\:mb-2 { margin-bottom: $spacing-2; }
+      .#{$breakpoint}\:mb-4 { margin-bottom: $spacing-4; }
+      .#{$breakpoint}\:mb-8 { margin-bottom: $spacing-8; }
+      
+      // Responsive padding utilities
+      .#{$breakpoint}\:p-0 { padding: $spacing-0; }
+      .#{$breakpoint}\:p-2 { padding: $spacing-2; }
+      .#{$breakpoint}\:p-4 { padding: $spacing-4; }
+      .#{$breakpoint}\:p-6 { padding: $spacing-6; }
+      
+      // Responsive horizontal padding
+      .#{$breakpoint}\:px-0 { padding-left: $spacing-0; padding-right: $spacing-0; }
+      .#{$breakpoint}\:px-2 { padding-left: $spacing-2; padding-right: $spacing-2; }
+      .#{$breakpoint}\:px-4 { padding-left: $spacing-4; padding-right: $spacing-4; }
+      .#{$breakpoint}\:px-8 { padding-left: $spacing-8; padding-right: $spacing-8; }
+      
+      // Responsive vertical padding
+      .#{$breakpoint}\:py-0 { padding-top: $spacing-0; padding-bottom: $spacing-0; }
+      .#{$breakpoint}\:py-2 { padding-top: $spacing-2; padding-bottom: $spacing-2; }
+      .#{$breakpoint}\:py-4 { padding-top: $spacing-4; padding-bottom: $spacing-4; }
+      
+      // Responsive gap utilities
+      .#{$breakpoint}\:gap-0 { gap: $spacing-0; }
+      .#{$breakpoint}\:gap-2 { gap: $spacing-2; }
+      .#{$breakpoint}\:gap-4 { gap: $spacing-4; }
+      .#{$breakpoint}\:gap-6 { gap: $spacing-6; }
+    }
+  }
+}
