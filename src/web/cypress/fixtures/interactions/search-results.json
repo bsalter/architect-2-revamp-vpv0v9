@@ -1,0 +1,136 @@
+{
+  "interactions": [
+    {
+      "id": 3,
+      "siteId": 2,
+      "title": "Project Update Meeting",
+      "type": "Meeting",
+      "lead": "John Smith",
+      "startDatetime": "2023-06-18T09:15:00.000Z",
+      "endDatetime": "2023-06-18T10:15:00.000Z",
+      "timezone": "America/New_York",
+      "location": "East Wing Room 305",
+      "description": "Weekly project status update with development team",
+      "notes": "Review sprint progress and upcoming milestones",
+      "createdBy": 1,
+      "createdAt": "2023-06-10T16:45:00.000Z",
+      "updatedAt": "2023-06-10T16:45:00.000Z",
+      "site": {
+        "id": 2,
+        "name": "Northwest Regional Office"
+      },
+      "creator": {
+        "id": 1,
+        "username": "jsmith",
+        "email": "jsmith@example.com"
+      },
+      "highlights": [
+        {
+          "field": "title",
+          "matchedText": "Project",
+          "snippets": ["<em>Project</em> Update Meeting"]
+        },
+        {
+          "field": "description",
+          "matchedText": "project",
+          "snippets": ["Weekly <em>project</em> status update with development team"]
+        }
+      ],
+      "relevanceScore": 0.92
+    },
+    {
+      "id": 8,
+      "siteId": 2,
+      "title": "Project Resource Planning",
+      "type": "Meeting",
+      "lead": "Mary Jones",
+      "startDatetime": "2023-07-02T13:00:00.000Z",
+      "endDatetime": "2023-07-02T14:30:00.000Z",
+      "timezone": "America/New_York",
+      "location": "Conference Room B",
+      "description": "Allocate resources for upcoming project phases",
+      "notes": "Bring current resource allocation spreadsheets",
+      "createdBy": 2,
+      "createdAt": "2023-06-25T09:15:00.000Z",
+      "updatedAt": "2023-06-25T09:15:00.000Z",
+      "site": {
+        "id": 2,
+        "name": "Northwest Regional Office"
+      },
+      "creator": {
+        "id": 2,
+        "username": "mjones",
+        "email": "mjones@example.com"
+      },
+      "highlights": [
+        {
+          "field": "title",
+          "matchedText": "Project",
+          "snippets": ["<em>Project</em> Resource Planning"]
+        },
+        {
+          "field": "description",
+          "matchedText": "project",
+          "snippets": ["Allocate resources for upcoming <em>project</em> phases"]
+        }
+      ],
+      "relevanceScore": 0.85
+    },
+    {
+      "id": 12,
+      "siteId": 2,
+      "title": "Cross-Project Dependencies Review",
+      "type": "Meeting",
+      "lead": "Tom Lee",
+      "startDatetime": "2023-07-12T10:30:00.000Z",
+      "endDatetime": "2023-07-12T12:00:00.000Z",
+      "timezone": "America/New_York",
+      "location": "Virtual",
+      "description": "Identify and resolve dependencies between concurrent projects",
+      "notes": "Prepare dependency diagrams before meeting",
+      "createdBy": 3,
+      "createdAt": "2023-07-05T14:20:00.000Z",
+      "updatedAt": "2023-07-05T14:20:00.000Z",
+      "site": {
+        "id": 2,
+        "name": "Northwest Regional Office"
+      },
+      "creator": {
+        "id": 3,
+        "username": "tlee",
+        "email": "tlee@example.com"
+      },
+      "highlights": [
+        {
+          "field": "title",
+          "matchedText": "Project",
+          "snippets": ["Cross-<em>Project</em> Dependencies Review"]
+        },
+        {
+          "field": "description",
+          "matchedText": "projects",
+          "snippets": ["dependencies between concurrent <em>projects</em>"]
+        }
+      ],
+      "relevanceScore": 0.78
+    }
+  ],
+  "total": 5,
+  "page": 1,
+  "pageSize": 10,
+  "executionTimeMs": 125,
+  "query": {
+    "globalSearch": "project",
+    "filters": [
+      {
+        "field": "type",
+        "operator": "EQUALS",
+        "value": "Meeting"
+      }
+    ],
+    "page": 1,
+    "pageSize": 10,
+    "sortField": "relevanceScore",
+    "sortDirection": "desc"
+  }
+}
