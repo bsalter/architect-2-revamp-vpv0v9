@@ -1,0 +1,311 @@
+@import '../../../styles/abstracts/variables';
+@import '../../../styles/abstracts/mixins';
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.nav-container {
+  @include flex(column, flex-start, stretch, nowrap);
+  width: 100%;
+  
+  @include respond-to(lg) {
+    @include flex(row, space-between, center, nowrap);
+  }
+}
+
+.desktop-nav {
+  display: none;
+  
+  @include respond-to(lg) {
+    display: block;
+    width: 100%;
+  }
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  @include flex(row, flex-start, center, nowrap);
+  gap: $spacing-4;
+}
+
+.nav-item {
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  color: $text-primary;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+  border-radius: 4px;
+  transition: $transition-base;
+  
+  &:hover {
+    color: $primary;
+    background-color: rgba($primary, 0.05);
+  }
+  
+  &:focus {
+    @include focus-visible;
+  }
+  
+  &.active {
+    color: $primary;
+    position: relative;
+    
+    &:after {
+      content: '';
+      position: absolute;
+      bottom: -$spacing-2;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 2px;
+      background-color: $primary;
+    }
+  }
+}
+
+.nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-right: $spacing-2;
+}
+
+.mobile-nav {
+  width: 100%;
+  
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+.mobile-menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  
+  &:focus {
+    @include focus-visible;
+  }
+  
+  .icon-bar {
+    display: block;
+    width: 22px;
+    height: 2px;
+    border-radius: 1px;
+    background-color: $text-primary;
+    transition: $transition-base;
+    
+    & + .icon-bar {
+      margin-top: 4px;
+    }
+  }
+  
+  &.active {
+    .icon-bar:nth-child(1) {
+      transform: rotate(45deg) translate(5px, 5px);
+    }
+    
+    .icon-bar:nth-child(2) {
+      opacity: 0;
+    }
+    
+    .icon-bar:nth-child(3) {
+      transform: rotate(-45deg) translate(4px, -4px);
+    }
+  }
+}
+
+.mobile-menu {
+  display: none;
+  width: 100%;
+  padding: $spacing-3;
+  background-color: $surface;
+  border-top: 1px solid $border;
+  border-bottom: 1px solid $border;
+  box-shadow: $shadow-md;
+  
+  &.active {
+    display: block;
+    animation: slideDown 0.2s ease-out;
+  }
+  
+  .nav-list {
+    @include flex(column, flex-start, stretch, nowrap);
+    gap: $spacing-2;
+  }
+  
+  .nav-item {
+    width: 100%;
+  }
+  
+  .nav-link {
+    width: 100%;
+    padding: $spacing-3 $spacing-2;
+  }
+}
+
+.user-menu {
+  position: relative;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+}
+
+.user-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: $primary;
+  color: white;
+  font-weight: $font-weight-medium;
+  margin-right: $spacing-2;
+}
+
+.username {
+  font-weight: $font-weight-medium;
+  display: none;
+  
+  @include respond-to(lg) {
+    display: block;
+  }
+}
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+  padding: $spacing-2;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+  }
+  
+  &:focus {
+    @include focus-visible;
+  }
+  
+  .dropdown-arrow {
+    margin-left: $spacing-2;
+    font-size: 0.7em;
+    transition: transform 0.2s ease;
+  }
+  
+  &.active .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  min-width: 200px;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: 4px;
+  padding: $spacing-2 0;
+  margin-top: $spacing-2;
+  box-shadow: $shadow-md;
+  z-index: $z-index-dropdown;
+  display: none;
+  
+  &.active {
+    display: block;
+    animation: fadeIn 0.2s ease-out;
+  }
+}
+
+.dropdown-item {
+  display: block;
+  padding: $spacing-2 $spacing-3;
+  color: $text-primary;
+  text-decoration: none;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+    color: $primary;
+  }
+  
+  &:focus {
+    @include focus-visible;
+  }
+}
+
+.dropdown-divider {
+  height: 1px;
+  background-color: $border;
+  margin: $spacing-2 0;
+}
+
+.create-button {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  padding: $spacing-2 $spacing-3;
+  margin-left: $spacing-3;
+  background-color: $primary;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: $font-weight-medium;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: darken($primary, 5%);
+  }
+  
+  &:focus {
+    @include focus-visible(white);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
