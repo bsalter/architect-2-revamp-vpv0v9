@@ -1,0 +1,133 @@
+<!-- Main filter panel container (shown only when isVisible is true) -->
+<div class="filter-panel" *ngIf="isVisible">
+  <div class="filter-panel-header">
+    FILTER OPTIONS
+    <button type="button" class="close-button" aria-label="Close" (click)="closeFilterPanel()">×</button>
+  </div>
+
+  <form [formGroup]="filterForm">
+    <div class="filter-content">
+      <!-- Type filter section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Type:</h3>
+        <div class="type-filter" formGroupName="type">
+          <label class="checkbox-label" *ngFor="let option of getFieldOptions('type')">
+            <input type="checkbox" [formControlName]="option.value">
+            <span>{{ option.label }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Date Range filter section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Date Range:</h3>
+        <div class="date-range-filter" formGroupName="dateRange">
+          <div class="date-input-group">
+            <label>From:</label>
+            <input type="date" formControlName="fromDate" (change)="onFromDateSelected($event)">
+          </div>
+          <div class="date-input-group">
+            <label>To:</label>
+            <input type="date" formControlName="toDate" (change)="onToDateSelected($event)">
+          </div>
+        </div>
+      </div>
+
+      <!-- Lead filter section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Lead:</h3>
+        <input type="text" formControlName="lead" placeholder="Filter by lead name">
+      </div>
+
+      <!-- Location filter section -->
+      <div class="filter-section">
+        <h3 class="filter-section-title">Location:</h3>
+        <input type="text" formControlName="location" placeholder="Filter by location">
+      </div>
+
+      <!-- Dynamic Advanced Filters section -->
+      <div class="advanced-filters-section" *ngIf="availableFields.length > 0">
+        <h3 class="filter-section-title">Advanced Filters:</h3>
+        
+        <div formArrayName="filters">
+          <div class="filter-row" *ngFor="let filter of filtersArray.controls; let i = index" [formGroupName]="i">
+            <!-- Field selector -->
+            <div class="filter-field">
+              <select formControlName="field" (change)="onFieldChanged($event, i)">
+                <option value="">Select field</option>
+                <option *ngFor="let field of availableFields" [value]="field.field">{{ field.displayName }}</option>
+              </select>
+            </div>
+            
+            <!-- Operator selector -->
+            <div class="filter-operator">
+              <select formControlName="operator" (change)="onOperatorChanged($event, i)">
+                <option value="">Operator</option>
+                <option *ngFor="let op of getOperatorsForField(filter.value.field)" [value]="op">{{ op }}</option>
+              </select>
+            </div>
+            
+            <!-- Value input based on field type -->
+            <div class="filter-value">
+              <!-- Text input for text fields -->
+              <input *ngIf="!isDateFilter(i) && !isSelectFilter(i)" 
+                     type="text" 
+                     formControlName="value" 
+                     placeholder="Value">
+              
+              <!-- Date input for date fields -->
+              <input *ngIf="isDateFilter(i)" 
+                     type="date" 
+                     formControlName="value">
+              
+              <!-- Select input for enumerated fields -->
+              <select *ngIf="isSelectFilter(i)" formControlName="value">
+                <option value="">Select value</option>
+                <option *ngFor="let option of getSelectOptions(filter.value.field)" [value]="option.value">
+                  {{ option.label }}
+                </option>
+              </select>
+            </div>
+            
+            <!-- Second value input for BETWEEN operator -->
+            <div class="filter-to-value" *ngIf="isBetweenOperator(i)">
+              <span>and</span>
+              <!-- Text input for non-date "between" -->
+              <input *ngIf="!isDateFilter(i)" 
+                     type="text" 
+                     formControlName="toValue" 
+                     placeholder="To value">
+              
+              <!-- Date input for date "between" -->
+              <input *ngIf="isDateFilter(i)" 
+                     type="date" 
+                     formControlName="toValue">
+            </div>
+            
+            <!-- Remove filter button -->
+            <div class="filter-actions">
+              <button type="button" class="remove-filter" (click)="removeFilter(i)" aria-label="Remove filter">×</button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Add filter button -->
+        <div class="add-filter">
+          <button type="button" (click)="addFilter()">+ Add filter</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter panel footer with action buttons -->
+    <div class="filter-panel-footer">
+      <button type="button" class="btn-clear" (click)="clearFilters()">Clear Filters</button>
+      <button type="button" class="btn-apply" (click)="applyFilters()">Apply</button>
+    </div>
+  </form>
+</div>
+
+<!-- Filter toggle button -->
+<button type="button" class="filter-toggle" (click)="toggleFilterPanel()">
+  <span>Filters</span>
+  <span class="filter-count" *ngIf="activeFiltersCount > 0">{{ activeFiltersCount }}</span>
+</button>
