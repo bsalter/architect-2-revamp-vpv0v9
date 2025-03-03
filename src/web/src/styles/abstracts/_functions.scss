@@ -1,0 +1,308 @@
+// =============================================================================
+// UTILITY FUNCTIONS
+// =============================================================================
+//
+// This file provides reusable Sass functions for consistent styling across
+// the Interaction Management System. These functions handle common operations
+// like unit conversion, color manipulation, responsive calculations, and
+// accessing design tokens from our system.
+//
+// =============================================================================
+
+@import "./variables";
+
+// =============================================================================
+// UNIT CONVERSION FUNCTIONS
+// =============================================================================
+
+/// Converts pixels to rem units
+/// @param {Number} $px-value - Value in pixels
+/// @return {String} Value in rem units
+@function rem($px-value) {
+  @if type-of($px-value) == "number" {
+    $base-font-size: 16px; // Default browser font size
+    @return ($px-value / $base-font-size) * 1rem;
+  } @else {
+    @error "#{$px-value} is not a number.";
+    @return 0;
+  }
+}
+
+/// Converts pixels to em units based on parent font size
+/// @param {Number} $px-value - Value in pixels
+/// @param {Number} $base-value [16px] - Base font size in pixels
+/// @return {String} Value in em units
+@function em($px-value, $base-value: 16px) {
+  @if type-of($px-value) == "number" and type-of($base-value) == "number" {
+    @return ($px-value / $base-value) * 1em;
+  } @else {
+    @error "#{$px-value} or #{$base-value} is not a number.";
+    @return 0;
+  }
+}
+
+/// Removes units from a value
+/// @param {Number} $value - Value with unit
+/// @return {Number} Unitless value
+@function strip-unit($value) {
+  @if type-of($value) == "number" {
+    @return $value / ($value * 0 + 1);
+  } @else {
+    @error "#{$value} is not a number.";
+    @return 0;
+  }
+}
+
+// =============================================================================
+// COLOR FUNCTIONS
+// =============================================================================
+
+/// Retrieves a color from the color system with optional opacity
+/// @param {String} $color-name - Name of the color
+/// @param {Number} $opacity [1] - Opacity level (0-1)
+/// @return {Color} Color value (HEX, RGB, or RGBA)
+@function color($color-name, $opacity: 1) {
+  // Create a map of all color variables for consistent access
+  $colors: (
+    "primary": $primary,
+    "primary-light": $primary-light,
+    "primary-dark": $primary-dark,
+    "secondary": $secondary,
+    "secondary-light": $secondary-light,
+    "secondary-dark": $secondary-dark,
+    "success": $success,
+    "success-light": $success-light,
+    "success-dark": $success-dark,
+    "warning": $warning,
+    "warning-light": $warning-light,
+    "warning-dark": $warning-dark,
+    "danger": $danger,
+    "danger-light": $danger-light,
+    "danger-dark": $danger-dark,
+    "background": $background,
+    "surface": $surface,
+    "text-primary": $text-primary,
+    "text-secondary": $text-secondary,
+    "border": $border,
+    "input-background": $input-background,
+    "input-border": $input-border,
+    "input-text": $input-text,
+    "input-placeholder": $input-placeholder,
+    "input-focus-border": $input-focus-border,
+    "input-disabled-background": $input-disabled-background,
+    "input-disabled-text": $input-disabled-text,
+    "input-error-border": $input-error-border,
+    "input-error-text": $input-error-text,
+    "hover-overlay": $hover-overlay,
+    "active-overlay": $active-overlay,
+    "focus-ring": $focus-ring
+  );
+  
+  $color-value: map-get($colors, $color-name);
+  
+  @if $color-value == null {
+    @warn "Color '#{$color-name}' not found in color system.";
+    @return rgba(0, 0, 0, $opacity); // Default to black
+  }
+  
+  @if $opacity >= 0 and $opacity <= 1 {
+    @if $opacity < 1 {
+      @return rgba($color-value, $opacity);
+    } @else {
+      @return $color-value;
+    }
+  } @else {
+    @error "Opacity must be between 0 and 1.";
+    @return $color-value;
+  }
+}
+
+/// Retrieves a semantic theme color
+/// @param {String} $theme-color-name - Semantic color name (primary, secondary, etc.)
+/// @param {Number} $opacity [1] - Opacity level (0-1)
+/// @return {Color} Theme color value
+@function theme-color($theme-color-name, $opacity: 1) {
+  // We can leverage the color function since it already contains theme colors
+  @return color($theme-color-name, $opacity);
+}
+
+/// Calculates whether to use light or dark text based on background color contrast
+/// @param {Color} $background-color - Background color
+/// @return {Color} Either light or dark text color
+@function contrast-color($background-color) {
+  $red: red($background-color);
+  $green: green($background-color);
+  $blue: blue($background-color);
+  
+  // Calculate relative luminance
+  // Simplified formula based on WCAG guidelines
+  $luminance: ($red * 0.299 + $green * 0.587 + $blue * 0.114) / 255;
+  
+  @return if($luminance > 0.5, $text-primary, #ffffff);
+}
+
+/// Lightens a color by mixing it with white
+/// @param {Color} $base-color - Base color
+/// @param {Percentage} $amount - Amount to lighten (0-100%)
+/// @return {Color} Tinted color
+@function tint($base-color, $amount) {
+  @if type-of($amount) != "number" {
+    @error "'#{$amount}' is not a number.";
+  }
+  
+  @if $amount < 0% or $amount > 100% {
+    @error "Amount must be between 0% and 100%.";
+  }
+  
+  @return mix(white, $base-color, $amount);
+}
+
+/// Darkens a color by mixing it with black
+/// @param {Color} $base-color - Base color
+/// @param {Percentage} $amount - Amount to darken (0-100%)
+/// @return {Color} Shaded color
+@function shade($base-color, $amount) {
+  @if type-of($amount) != "number" {
+    @error "'#{$amount}' is not a number.";
+  }
+  
+  @if $amount < 0% or $amount > 100% {
+    @error "Amount must be between 0% and 100%.";
+  }
+  
+  @return mix(black, $base-color, $amount);
+}
+
+// =============================================================================
+// DESIGN SYSTEM FUNCTIONS
+// =============================================================================
+
+/// Retrieves a spacing value from the spacing system
+/// @param {String|Number} $spacing-key - Spacing key or multiplier
+/// @return {String} Spacing value in rem
+@function spacing($spacing-key) {
+  // Create a map of spacing values for consistent access
+  $spacing: (
+    0: $spacing-0,
+    1: $spacing-1,
+    2: $spacing-2,
+    3: $spacing-3,
+    4: $spacing-4,
+    5: $spacing-5,
+    6: $spacing-6,
+    8: $spacing-8,
+    10: $spacing-10,
+    12: $spacing-12,
+    16: $spacing-16,
+    20: $spacing-20,
+    24: $spacing-24,
+    32: $spacing-32
+  );
+  
+  // If it's a number not in the map, multiply by base spacing unit
+  @if type-of($spacing-key) == "number" and not map-has-key($spacing, $spacing-key) {
+    @return rem($spacing-key * 4px); // 4px is our base spacing unit
+  }
+  
+  $value: map-get($spacing, $spacing-key);
+  
+  @if $value == null {
+    @warn "Spacing key '#{$spacing-key}' not found in spacing system.";
+    @return rem($spacing-key * 1px); // Fallback to direct conversion
+  }
+  
+  @return $value;
+}
+
+/// Retrieves a breakpoint value from the responsive system
+/// @param {String} $breakpoint-name - Breakpoint name (xs, sm, md, lg, xl)
+/// @return {String} Breakpoint value in pixels
+@function breakpoint($breakpoint-name) {
+  $value: map-get($breakpoints, $breakpoint-name);
+  
+  @if $value == null {
+    @error "Breakpoint '#{$breakpoint-name}' not found in breakpoint system.";
+  }
+  
+  @return $value * 1px;
+}
+
+/// Retrieves a z-index value from the layering system
+/// @param {String} $layer-name - Layer name
+/// @return {Number} Z-index value
+@function z-index($layer-name) {
+  // Create a map of z-index values for consistent access
+  $z-index-layers: (
+    "dropdown": $z-index-dropdown,
+    "sticky": $z-index-sticky,
+    "fixed": $z-index-fixed,
+    "modal-backdrop": $z-index-modal-backdrop,
+    "modal": $z-index-modal,
+    "popover": $z-index-popover,
+    "tooltip": $z-index-tooltip
+  );
+  
+  $value: map-get($z-index-layers, $layer-name);
+  
+  @if $value == null {
+    @warn "Z-index layer '#{$layer-name}' not found. Using default z-index 1.";
+    @return 1;
+  }
+  
+  @return $value;
+}
+
+/// Safely retrieves a nested value from a Sass map
+/// @param {Map} $map - Sass map
+/// @param {List} $keys - List of keys for map traversal
+/// @return {*} Retrieved value or null
+@function map-deep-get($map, $keys...) {
+  @if type-of($map) != "map" {
+    @error "'#{$map}' is not a map.";
+    @return null;
+  }
+  
+  $current: $map;
+  
+  @each $key in $keys {
+    @if type-of($current) != "map" {
+      @return null;
+    }
+    
+    $current: map-get($current, $key);
+    
+    @if $current == null {
+      @return null;
+    }
+  }
+  
+  @return $current;
+}
+
+// =============================================================================
+// RESPONSIVE FUNCTIONS
+// =============================================================================
+
+/// Calculates fluid typography size based on viewport width
+/// @param {Number} $min-size - Minimum font size (px)
+/// @param {Number} $max-size - Maximum font size (px)
+/// @param {String} $min-viewport - Minimum viewport width (px)
+/// @param {String} $max-viewport - Maximum viewport width (px)
+/// @return {String} Responsive font-size CSS with clamp()
+@function fluid-type($min-size, $max-size, $min-viewport, $max-viewport) {
+  // Convert all values to numbers without units
+  $min-size-unitless: strip-unit($min-size);
+  $max-size-unitless: strip-unit($max-size);
+  $min-viewport-unitless: strip-unit($min-viewport);
+  $max-viewport-unitless: strip-unit($max-viewport);
+  
+  // Calculate the slope and the y-intercept for the linear equation
+  $slope: ($max-size-unitless - $min-size-unitless) / ($max-viewport-unitless - $min-viewport-unitless);
+  $y-intercept: $min-size-unitless - $slope * $min-viewport-unitless;
+  
+  // Construct the clamp() function
+  // clamp(min-size, preferred-size, max-size)
+  $preferred-size: #{$y-intercept}rem + #{$slope * 100}vw;
+  
+  @return clamp(#{$min-size-unitless}rem, #{$preferred-size}, #{$max-size-unitless}rem);
+}
