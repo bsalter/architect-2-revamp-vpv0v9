@@ -1,0 +1,179 @@
+@import "../../../../styles/abstracts/_variables";
+@import "../../../../styles/abstracts/_mixins";
+
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: $z-index-modal;
+  @include flex(row, center, center);
+  background-color: rgba(0, 0, 0, 0.5);
+  padding: $spacing-4;
+  
+  @include respond-to('sm') {
+    padding: $spacing-3;
+  }
+  
+  @include respond-to('xs') {
+    padding: $spacing-2;
+  }
+}
+
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  color: $text-primary;
+  @include elevation(3);
+  animation: modal-fade-in 0.3s ease;
+}
+
+.modal-header {
+  @include flex(row, space-between, center);
+  padding: $spacing-4;
+  border-bottom: 1px solid rgba($danger, 0.2);
+  
+  @include respond-to('sm') {
+    padding: $spacing-3;
+  }
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: $danger;
+}
+
+.close-button {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: $spacing-2;
+  margin: -$spacing-2;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.6);
+  transition: color 0.2s ease;
+  
+  &:hover {
+    color: rgba(0, 0, 0, 0.8);
+  }
+  
+  &:focus {
+    @include focus-visible;
+  }
+}
+
+.modal-body {
+  padding: $spacing-4;
+  
+  @include respond-to('sm') {
+    padding: $spacing-3;
+  }
+}
+
+.confirmation-message {
+  margin-top: 0;
+  margin-bottom: $spacing-3;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.interaction-info {
+  margin-bottom: $spacing-3;
+  padding: $spacing-3;
+  background-color: rgba($danger, 0.05);
+  border-radius: $border-radius-md;
+  border-left: 3px solid $danger;
+}
+
+.info-row {
+  @include flex(row, flex-start, flex-start);
+  margin-bottom: $spacing-2;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.info-label {
+  font-weight: 600;
+  margin-right: $spacing-2;
+  min-width: 60px;
+}
+
+.info-value {
+  word-break: break-word;
+}
+
+.warning-text {
+  color: $danger;
+  font-weight: 500;
+  margin-bottom: $spacing-3;
+  font-size: 0.875rem;
+}
+
+.error-message {
+  margin-top: $spacing-3;
+}
+
+.modal-footer {
+  @include flex(row, flex-end, center);
+  gap: $spacing-2;
+  padding: $spacing-4;
+  border-top: 1px solid rgba($danger, 0.2);
+  
+  @include respond-to('sm') {
+    padding: $spacing-3;
+  }
+  
+  @include respond-to('xs') {
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+  
+  & > button {
+    @include respond-to('xs') {
+      width: 100%;
+      margin-bottom: $spacing-2;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.btn-danger {
+  background-color: $danger;
+  color: white;
+  transition: background-color 0.2s ease;
+  
+  &:hover:not(:disabled) {
+    background-color: darken($danger, 10%);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: darken($danger, 15%);
+  }
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
