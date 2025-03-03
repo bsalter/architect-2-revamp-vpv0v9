@@ -1,0 +1,243 @@
+// =============================================================================
+// MODAL COMPONENTS
+// =============================================================================
+//
+// This file contains styling for modal dialogs throughout the Interaction
+// Management System, including confirmation dialogs, detail views, and forms.
+// It ensures consistent appearance, accessibility, and responsive behavior.
+//
+// =============================================================================
+
+// Import design tokens and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// MODAL VARIABLES
+// =============================================================================
+
+$modal-padding-default: $spacing-4;
+$modal-padding-mobile: $spacing-3;
+$modal-width-sm: 400px;
+$modal-width-md: 550px;
+$modal-width-lg: 750px;
+$modal-animation-duration: 0.3s;
+
+// =============================================================================
+// MODAL BACKDROP
+// =============================================================================
+// Semi-transparent overlay behind modals
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: $z-index-modal-backdrop;
+  animation: modal-backdrop-fade $modal-animation-duration ease;
+}
+
+// =============================================================================
+// MODAL CONTAINER
+// =============================================================================
+// Controls positioning and scrolling behavior
+
+.modal-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: $z-index-modal;
+  @include flex(row, center, center);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: $spacing-4;
+  
+  @include respond-to('sm') {
+    padding: $spacing-3;
+  }
+  
+  @include respond-to('xs') {
+    padding: $spacing-2;
+  }
+}
+
+// =============================================================================
+// MODAL DIALOG
+// =============================================================================
+// The actual modal box containing content
+
+.modal-dialog {
+  position: relative;
+  width: 100%;
+  max-width: $modal-width-md;
+  background-color: $surface;
+  color: $text-primary;
+  border-radius: $border-radius-md;
+  @include elevation(3);
+  animation: modal-fade-in $modal-animation-duration ease;
+  margin: 1.75rem auto;
+  
+  // Modal size variants
+  &.modal-sm {
+    max-width: $modal-width-sm;
+  }
+  
+  &.modal-lg {
+    max-width: $modal-width-lg;
+  }
+  
+  &:focus {
+    outline: none;
+  }
+}
+
+// =============================================================================
+// MODAL CONTENT STRUCTURE
+// =============================================================================
+// Layout components for modal sections
+
+.modal-content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  outline: 0;
+}
+
+.modal-header {
+  @include flex(row, space-between, center);
+  padding: $modal-padding-default;
+  border-bottom: 1px solid $border;
+  border-top-left-radius: $border-radius-md;
+  border-top-right-radius: $border-radius-md;
+  
+  @include respond-to('sm') {
+    padding: $modal-padding-mobile;
+  }
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: $text-primary;
+}
+
+.modal-close {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.5);
+  padding: $spacing-2;
+  margin: -$spacing-2;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  &:hover, &:focus {
+    color: rgba(0, 0, 0, 0.75);
+  }
+  
+  &:focus {
+    @include focus-visible;
+  }
+}
+
+.modal-body {
+  position: relative;
+  flex: 1 1 auto;
+  padding: $modal-padding-default;
+  
+  @include respond-to('sm') {
+    padding: $modal-padding-mobile;
+  }
+}
+
+.modal-footer {
+  @include flex(row, flex-end, center);
+  gap: $spacing-2;
+  padding: $modal-padding-default;
+  border-top: 1px solid $border;
+  border-bottom-left-radius: $border-radius-md;
+  border-bottom-right-radius: $border-radius-md;
+  
+  @include respond-to('sm') {
+    padding: $modal-padding-mobile;
+  }
+  
+  // Stack buttons vertically on smaller screens
+  @include respond-to('xs') {
+    flex-direction: column-reverse;
+    width: 100%;
+    
+    & > button, & > .btn {
+      width: 100%;
+      margin-bottom: $spacing-2;
+      
+      &:first-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// MODAL VARIANTS
+// =============================================================================
+// Specialized modal styles for specific use cases
+
+// Danger variant for delete confirmation and destructive actions
+.modal-danger {
+  .modal-header {
+    border-bottom-color: rgba($danger, 0.2);
+  }
+  
+  .modal-title {
+    color: $danger;
+  }
+  
+  .modal-footer {
+    border-top-color: rgba($danger, 0.2);
+  }
+}
+
+// =============================================================================
+// BODY SCROLL LOCK
+// =============================================================================
+// Prevents background scrolling when modal is open
+
+.modal-scroll-lock {
+  overflow: hidden;
+  padding-right: var(--scrollbar-width, 0);
+}
+
+// =============================================================================
+// ANIMATIONS
+// =============================================================================
+// Keyframes for modal and backdrop animations
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes modal-backdrop-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
