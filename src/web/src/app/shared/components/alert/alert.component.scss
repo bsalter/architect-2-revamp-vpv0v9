@@ -1,0 +1,108 @@
+// Import variables and mixins
+@import '../../../styles/abstracts/variables';
+@import '../../../styles/abstracts/mixins';
+
+// Host element styles
+:host {
+  display: block;
+  width: 100%;
+  margin-bottom: $spacing-4;
+}
+
+// Alert container
+.alert {
+  @include flex(row, flex-start, flex-start);
+  position: relative;
+  padding: $spacing-4;
+  border: 1px solid transparent;
+  border-radius: $border-radius-md;
+  width: 100%;
+  transition: $transition-base;
+}
+
+// Alert variants
+.alert-success {
+  background-color: lighten($success, 45%);
+  border-color: $success-light;
+  color: $success-dark;
+}
+
+.alert-warning {
+  background-color: lighten($warning, 45%);
+  border-color: $warning-light;
+  color: $warning-dark;
+}
+
+.alert-danger {
+  background-color: lighten($danger, 45%);
+  border-color: $danger-light;
+  color: $danger-dark;
+}
+
+.alert-info {
+  background-color: lighten($primary, 45%);
+  border-color: $primary-light;
+  color: $primary-dark;
+}
+
+// Alert icon
+.alert-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: $spacing-3;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  
+  i {
+    font-size: $font-size-xl;
+  }
+}
+
+// Alert content
+.alert-content {
+  flex: 1;
+  font-size: $font-size-md;
+  line-height: $line-height-normal;
+}
+
+// Alert close button
+.alert-close {
+  position: absolute;
+  top: $spacing-2;
+  right: $spacing-2;
+  padding: $spacing-1;
+  background: transparent;
+  border: 0;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: $transition-base;
+  color: inherit;
+  
+  &:hover,
+  &:focus {
+    opacity: 0.75;
+    outline: none;
+  }
+}
+
+// Responsive styles for mobile devices
+@include respond-to(xs) {
+  .alert {
+    padding: $spacing-3;
+  }
+  
+  .alert-icon {
+    margin-right: $spacing-2;
+  }
+}
+
+// Responsive styles for small tablets
+@include respond-to(sm) {
+  .alert {
+    padding: $spacing-3 $spacing-4;
+  }
+}
