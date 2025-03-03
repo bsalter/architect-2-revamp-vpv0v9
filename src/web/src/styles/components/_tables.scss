@@ -1,0 +1,333 @@
+// =============================================================================
+// TABLE STYLES
+// =============================================================================
+//
+// This file provides base styling for tables throughout the application, with
+// a particular focus on the Interaction Finder interface. It includes styles for
+// responsive behavior, transforming tables into card-based layouts on smaller
+// screens, and ensures accessibility compliance.
+//
+// =============================================================================
+
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// BASE TABLE STYLES
+// =============================================================================
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  margin-bottom: $spacing-4;
+  box-shadow: $shadow-sm;
+  
+  // Apply proper a11y focus outlines to table elements
+  &:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 2px $primary;
+  }
+}
+
+.table-header {
+  background-color: $table-header-bg;
+  font-weight: 600;
+  color: $text-primary;
+  text-align: left;
+  border-bottom: 2px solid $table-border-color;
+  
+  th {
+    padding: $table-cell-padding;
+    vertical-align: middle;
+    
+    // Ensure screen readers announce headers properly
+    &[scope="col"], &[scope="row"] {
+      font-weight: 600;
+    }
+  }
+}
+
+.table-row {
+  border-bottom: 1px solid $table-border-color;
+  transition: background-color 0.2s ease;
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  &:focus {
+    outline: none;
+    background-color: rgba($primary, 0.05);
+  }
+}
+
+.table-row--even {
+  background-color: $table-stripe-bg;
+}
+
+.table-row--hover {
+  background-color: $table-hover-bg;
+  cursor: pointer;
+}
+
+.table-row--active {
+  background-color: $table-active-bg;
+}
+
+.table-cell {
+  padding: $table-cell-padding;
+  vertical-align: middle;
+}
+
+.table-cell--truncate {
+  max-width: 200px;
+  @include truncate-text;
+}
+
+.table-cell--center {
+  text-align: center;
+}
+
+.table-cell--right {
+  text-align: right;
+}
+
+// =============================================================================
+// SORTABLE TABLE STYLES
+// =============================================================================
+
+.table-sortable {
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  padding-right: $spacing-4;
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+  }
+  
+  &:focus {
+    @include focus-visible;
+    outline-offset: -2px;
+  }
+}
+
+.table-sortable-indicator {
+  position: absolute;
+  right: $spacing-2;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  // Default state (no sort)
+  &:after {
+    content: '↕';
+    opacity: 0.5;
+    font-size: 0.75em;
+  }
+  
+  // Ascending sort
+  &.asc:after {
+    content: '↑';
+    opacity: 1;
+  }
+  
+  // Descending sort
+  &.desc:after {
+    content: '↓';
+    opacity: 1;
+  }
+}
+
+// =============================================================================
+// RESPONSIVE TABLE
+// =============================================================================
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin-bottom: $spacing-4;
+  -webkit-overflow-scrolling: touch;
+  
+  // Add subtle shadow indicators for scrollable tables
+  background: linear-gradient(to right, $surface 30%, rgba($surface, 0)),
+              linear-gradient(to left, $surface 30%, rgba($surface, 0)) 100% 0;
+  background-size: 20px 100%, 20px 100%;
+  background-repeat: no-repeat;
+  background-attachment: local, local;
+}
+
+// =============================================================================
+// TABLE ACTIONS
+// =============================================================================
+
+.table-actions {
+  display: flex;
+  gap: $spacing-2;
+  justify-content: flex-end;
+  
+  button, a {
+    // Style action buttons in table cells
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:focus-visible {
+      @include focus-visible;
+    }
+  }
+}
+
+// =============================================================================
+// CARD VIEW FOR MOBILE
+// =============================================================================
+
+.table-card-view {
+  display: none;
+}
+
+// =============================================================================
+// RESPONSIVE BEHAVIOR MIXINS
+// =============================================================================
+
+// Mixin to handle responsive table behavior at different breakpoints
+@mixin table-responsive-breakpoint($breakpoint) {
+  @include respond-to($breakpoint) {
+    @content;
+  }
+}
+
+// Mixin to transform a standard table into a card-based layout for mobile
+@mixin table-card-transform {
+  // Hide the standard table
+  .table {
+    display: none;
+  }
+  
+  // Show the card view
+  .table-card-view {
+    display: block;
+    
+    .card {
+      background-color: $surface;
+      border-radius: $border-radius-md;
+      border: 1px solid $table-border-color;
+      margin-bottom: $spacing-3;
+      @include elevation(1);
+      
+      &:focus-within {
+        border-color: $primary;
+        @include elevation(2);
+      }
+    }
+    
+    .card-header {
+      font-weight: 600;
+      padding: $table-cell-padding;
+      border-bottom: 1px solid $table-border-color;
+      background-color: $table-header-bg;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .card-body {
+      padding: $table-cell-padding;
+    }
+    
+    .card-row {
+      display: flex;
+      margin-bottom: $spacing-2;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+    
+    .card-label {
+      width: 40%;
+      font-weight: 500;
+      color: $text-secondary;
+      padding-right: $spacing-2;
+    }
+    
+    .card-value {
+      width: 60%;
+      @include truncate-text;
+    }
+    
+    .card-footer {
+      padding: $table-cell-padding;
+      border-top: 1px solid $table-border-color;
+      display: flex;
+      justify-content: flex-end;
+      gap: $spacing-2;
+    }
+  }
+}
+
+// =============================================================================
+// PAGINATION
+// =============================================================================
+
+.table-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-3;
+  
+  .pagination-info {
+    color: $text-secondary;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    gap: $spacing-2;
+    
+    button {
+      &:focus-visible {
+        @include focus-visible;
+      }
+      
+      &[disabled] {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      &.active {
+        background-color: $primary;
+        color: $surface;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// =============================================================================
+
+// For screen readers
+.table [aria-sort="ascending"] .table-sortable-indicator:after {
+  content: '↑';
+  opacity: 1;
+}
+
+.table [aria-sort="descending"] .table-sortable-indicator:after {
+  content: '↓';
+  opacity: 1;
+}
+
+// High contrast mode support
+@media (forced-colors: active) {
+  .table-row--active,
+  .table-row--hover,
+  .table-row:hover {
+    outline: 2px solid CanvasText;
+  }
+  
+  .table-sortable:focus,
+  .table-pagination button:focus {
+    outline: 2px solid Highlight;
+  }
+}
