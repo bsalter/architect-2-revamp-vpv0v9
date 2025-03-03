@@ -1,0 +1,278 @@
+// =============================================================================
+// TYPOGRAPHY
+// =============================================================================
+//
+// Base typography styles for the Interaction Management System.
+// This file implements the typography design system defined in the technical
+// specifications, establishing consistent text styling across the application.
+//
+// Works in conjunction with normalize.scss and reset.scss to provide a cohesive
+// foundation for all text elements.
+//
+// =============================================================================
+
+// Import typography variables and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// FONT IMPORTS
+// =============================================================================
+
+// Import Inter font from Google Fonts - v1.0.0
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+// =============================================================================
+// BASE TYPOGRAPHY
+// =============================================================================
+
+// Set base typography on html and body
+html, body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  font-weight: $font-weight-regular;
+  line-height: $line-height-normal;
+  color: $text-primary;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+// =============================================================================
+// HEADINGS
+// =============================================================================
+
+// Heading 1
+h1, .h1 {
+  @include font-style('heading1');
+  margin-top: 0;
+  margin-bottom: 1rem;
+  
+  @include respond-to(sm) {
+    font-size: $font-size-3xl;
+  }
+  
+  @include respond-to(md) {
+    font-size: $font-size-4xl;
+  }
+}
+
+// Heading 2
+h2, .h2 {
+  @include font-style('heading2');
+  margin-top: 0;
+  margin-bottom: 0.875rem;
+  
+  @include respond-to(sm) {
+    font-size: $font-size-2xl;
+  }
+  
+  @include respond-to(md) {
+    font-size: $font-size-3xl;
+  }
+}
+
+// Heading 3
+h3, .h3 {
+  @include font-style('heading3');
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  
+  @include respond-to(sm) {
+    font-size: $font-size-xl;
+  }
+  
+  @include respond-to(md) {
+    font-size: $font-size-2xl;
+  }
+}
+
+// Heading 4
+h4, .h4 {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-snug;
+  margin-top: 0;
+  margin-bottom: 0.625rem;
+  
+  @include respond-to(sm) {
+    font-size: $font-size-lg;
+  }
+  
+  @include respond-to(md) {
+    font-size: $font-size-xl;
+  }
+}
+
+// Heading 5
+h5, .h5 {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-snug;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+// Heading 6
+h6, .h6 {
+  font-size: $font-size-md;
+  font-weight: $font-weight-semibold;
+  line-height: $line-height-snug;
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+// =============================================================================
+// TEXT ELEMENTS
+// =============================================================================
+
+// Paragraphs
+p {
+  @include font-style('body');
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+// Links
+a {
+  color: $primary;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+  
+  &:hover {
+    color: $primary-dark;
+    text-decoration: underline;
+  }
+  
+  &:focus {
+    outline: 2px solid rgba($primary, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+// Strong text
+strong, b {
+  font-weight: $font-weight-bold;
+}
+
+// Small text
+small {
+  @include font-style('small');
+}
+
+// =============================================================================
+// TEXT UTILITY CLASSES
+// =============================================================================
+
+// Text colors
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+// Text sizes
+.text-xs {
+  font-size: $font-size-xs;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-md {
+  font-size: $font-size-md;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}
+
+.text-2xl {
+  font-size: $font-size-2xl;
+}
+
+.text-3xl {
+  font-size: $font-size-3xl;
+}
+
+.text-4xl {
+  font-size: $font-size-4xl;
+}
+
+// Font weights
+.font-regular {
+  font-weight: $font-weight-regular;
+}
+
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+// Text alignment
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+// Text transform
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+// Text overflow
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Line heights
+.line-height-none {
+  line-height: $line-height-none;
+}
+
+.line-height-tight {
+  line-height: $line-height-tight;
+}
+
+.line-height-snug {
+  line-height: $line-height-snug;
+}
+
+.line-height-normal {
+  line-height: $line-height-normal;
+}
