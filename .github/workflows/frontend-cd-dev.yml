@@ -1,0 +1,211 @@
+# GitHub Actions workflow for continuous deployment of the frontend application to the development environment.
+name: Frontend CD - Development
+
+# Workflow Triggers
+on:
+  # Trigger the workflow on push events to the main branch
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/web/**'
+      - '.github/workflows/frontend-cd-dev.yml'
+
+  # Allow manual triggering of the workflow
+  workflow_dispatch:
+    inputs:
+      deploy_type:
+        description: 'Type of deployment'
+        required: true
+        default: 'standard'
+        type: choice
+        options:
+          - standard
+          - redeploy
+
+# Define the environment for the workflow
+environment:
+  name: development
+  url: ${{ steps.deploy.outputs.url }}
+
+# Concurrency settings to prevent multiple deployments at once
+concurrency:
+  group: development-frontend
+  cancel-in-progress: true
+
+# Define the jobs to be executed in the workflow
+jobs:
+  # Job to build and push the Docker image
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3  # actions/checkout version: v3
+
+      # Step 2: Set up Docker Buildx for efficient container builds
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2  # docker/setup-buildx-action version: v2
+
+      # Step 3: Configure AWS credentials for accessing ECR
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2  # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEV_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Step 4: Login to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: docker/login-action@v2  # docker/login-action version: v2
+        with:
+          registry: ${{ secrets.ECR_DEV_REGISTRY }}
+
+      # Step 5: Extract metadata for Docker using GitHub context
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4  # docker/metadata-action version: v4
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/${{ secrets.ECR_DEV_REPOSITORY }}
+          tags: |
+            type=sha,format=short
+            latest
+
+      # Step 6: Prepare development environment configuration
+      - name: Prepare development environment configuration
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: |
+          cp src/environments/environment.ts src/environments/environment.prod.ts
+          sed -i 's/production: false/production: true/g' src/environments/environment.prod.ts
+          sed -i 's|apiUrl:.*|apiUrl: "${{ secrets.DEV_API_URL }}",|g' src/environments/environment.prod.ts
+
+      # Step 7: Build and push the Docker image to ECR using multi-stage Dockerfile
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4  # docker/build-push-action version: v4
+        with:
+          context: ${{ env.WORKING_DIRECTORY }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: NODE_ENV=production
+
+      # Step 8: Save the image tag for use in later jobs
+      - name: Save image tag for later jobs
+        id: image
+        run: echo "IMAGE_TAG=$(echo ${{ steps.meta.outputs.tags }} | cut -d',' -f1)" >> $GITHUB_OUTPUT
+
+    outputs:
+      IMAGE_TAG: ${{ steps.image.outputs.IMAGE_TAG }}
+
+  # Job to deploy the built container to the development ECS cluster
+  deploy_to_dev:
+    name: Deploy to Development Environment
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    environment:
+      name: development
+      url: ${{ steps.deploy.outputs.url }}
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3  # actions/checkout version: v3
+
+      # Step 2: Configure AWS credentials
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2  # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_DEV_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_DEV_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Step 3: Download current ECS task definition
+      - name: Download task definition
+        run: aws ecs describe-task-definition --task-definition ${{ secrets.ECS_DEV_FRONTEND_TASK_DEFINITION }} --query taskDefinition > task-definition.json
+
+      # Step 4: Update container image in task definition
+      - name: Update container image in task definition
+        id: render-task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1  # aws-actions/amazon-ecs-render-task-definition version: v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.build_and_push.outputs.IMAGE_TAG }}
+
+      # Step 5: Deploy to Amazon ECS
+      - name: Deploy to Amazon ECS
+        id: deploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1  # aws-actions/amazon-ecs-deploy-task-definition version: v1
+        with:
+          task-definition: ${{ steps.render-task-def.outputs.task-definition }}
+          service: ${{ secrets.ECS_DEV_FRONTEND_SERVICE }}
+          cluster: ${{ secrets.ECS_DEV_CLUSTER }}
+          wait-for-service-stability: true
+
+      # Step 6: Output deployment URL
+      - name: Output deployment URL
+        run: echo "::set-output name=url::${{ secrets.DEV_APP_URL }}"
+
+      # Step 7: Verify deployment with health check
+      - name: Verify deployment with health check
+        run: curl -sSf ${{ secrets.DEV_APP_URL }} || exit 1
+
+  # Job to run smoke tests against the deployed frontend application
+  run_smoke_tests:
+    name: Run Smoke Tests
+    needs: deploy_to_dev
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository code
+      - name: Checkout code
+        uses: actions/checkout@v3  # actions/checkout version: v3
+
+      # Step 2: Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v3  # actions/setup-node version: v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/web/package-lock.json
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npm ci
+
+      # Step 4: Run basic smoke tests
+      - name: Run basic smoke tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: npx cypress run --config baseUrl=${{ secrets.DEV_APP_URL }} --spec 'cypress/e2e/smoke-tests/**/*.cy.ts'
+        env:
+          CYPRESS_API_URL: ${{ secrets.DEV_API_URL }}
+
+      # Step 5: Upload test artifacts
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3  # actions/upload-artifact version: v3
+        if: always()
+        with:
+          name: smoke-test-artifacts
+          path: ${{ env.WORKING_DIRECTORY }}/cypress/screenshots, ${{ env.WORKING_DIRECTORY }}/cypress/videos
+          if-no-files-found: ignore
+
+      # Step 6: Notify deployment status
+      - name: Notify deployment status
+        if: always()
+        uses: actions/github-script@v6  # actions/github-script version: v6
+        with:
+          script: |
+            const { job, sha, repo, runId } = context;
+            const runUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+            const status = job.status;
+            github.rest.issues.createComment({
+              ...repo,
+              issue_number: context.issue.number,
+              body: `📣 Frontend deployment to development environment ${status === 'success' ? 'succeeded ✅' : 'failed ❌'}\n\nCommit: ${sha}\nWorkflow: [Run #${runId}](${runUrl})`
+            });
