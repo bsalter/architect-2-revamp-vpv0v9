@@ -1,0 +1,119 @@
+@import '../../../../styles/abstracts/_variables';
+@import '../../../../styles/abstracts/_mixins';
+
+.pagination-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: $spacing-4 0;
+  padding: $spacing-2 0;
+  width: 100%;
+
+  @include respond-to(sm) {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+.pagination {
+  display: flex;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  border-radius: $border-radius-md;
+  overflow: hidden;
+}
+
+.page-item {
+  margin: 0 $spacing-1;
+  display: inline-flex;
+
+  @include respond-to(sm) {
+    margin: 0 $spacing-2;
+  }
+
+  &.active {
+    .page-link {
+      background-color: $primary;
+      color: $surface;
+      border-color: $primary;
+    }
+  }
+
+  &.disabled {
+    .page-link {
+      opacity: $disabled-opacity;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+  }
+
+  &.first-page, &.last-page {
+    display: none;
+
+    @include respond-to(sm) {
+      display: inline-flex;
+    }
+  }
+}
+
+.page-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 2rem;
+  padding: $spacing-1 $spacing-2;
+  text-align: center;
+  color: $text-primary;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-md;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+
+  &:hover {
+    background-color: rgba($primary, 0.1);
+    border-color: $primary;
+  }
+
+  &:focus {
+    outline: none;
+    @include focus-visible($primary);
+  }
+
+  @include respond-to(sm) {
+    min-width: 2.5rem;
+    height: 2.5rem;
+  }
+}
+
+.pagination-info {
+  margin-top: $spacing-2;
+  font-size: 0.875rem;
+  color: $text-secondary;
+  text-align: center;
+
+  @include respond-to(sm) {
+    margin-top: 0;
+    text-align: right;
+  }
+}
+
+.start-ellipsis, .end-ellipsis {
+  display: none;
+
+  @include respond-to(sm) {
+    display: inline-flex;
+  }
+
+  .page-link {
+    cursor: default;
+
+    &:hover {
+      background-color: $surface;
+      border-color: $border;
+    }
+  }
+}
