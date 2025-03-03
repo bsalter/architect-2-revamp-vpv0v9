@@ -1,0 +1,119 @@
+version: '3.8'
+
+services:
+  backend:
+    description: Flask API backend service configured for development with hot-reloading
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+      args:
+        - APP_ENV=development
+    environment:
+      - FLASK_APP=app.py
+      - FLASK_ENV=development
+      - DEBUG=True
+      - LOG_LEVEL=DEBUG
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/interaction_db
+      - REDIS_URL=redis://cache:6379/0
+      - AUTH0_DOMAIN=${AUTH0_DOMAIN}
+      - AUTH0_API_AUDIENCE=${AUTH0_API_AUDIENCE}
+      - AUTH0_ISSUER=${AUTH0_ISSUER}
+      - CORS_ALLOWED_ORIGINS=http://localhost:4200,http://frontend:4200
+    volumes:
+      - ./src/backend:/app
+    ports:
+      - "5000:5000"
+    command: flask run --host=0.0.0.0 --port=5000 --reload
+    depends_on:
+      - db
+      - cache
+    restart: unless-stopped
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  frontend:
+    description: Angular frontend service configured for development with live reloading
+    build:
+      context: ./src/web
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        - NODE_ENV=development
+    volumes:
+      - ./src/web:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "4200:4200"
+    environment:
+      - NODE_ENV=development
+      - API_URL=http://localhost:5000/api
+    command: npm run start -- --host 0.0.0.0 --disable-host-check
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:4200/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  db:
+    description: PostgreSQL database service for development with data persistence
+    image: postgres:15.3 # postgres version specified in JSON file
+    environment:
+      - POSTGRES_DB=interaction_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./src/backend/scripts/db_seed.py:/docker-entrypoint-initdb.d/db_seed.py
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app_network
+
+  cache:
+    description: Redis cache service for development
+    image: redis:7.0.12 # redis version specified in JSON file
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app_network
+
+volumes:
+  postgres_data:
+    description: Persistent volume for PostgreSQL database storage in development
+  redis_data:
+    description: Persistent volume for Redis cache data in development
+  node_modules:
+    description: Volume for Node.js dependencies to avoid host filesystem performance issues
+
+networks:
+  app_network:
+    description: Internal network for connecting application services in development
+    driver: bridge
