@@ -1,0 +1,343 @@
+// =============================================================================
+// FORM COMPONENTS
+// =============================================================================
+//
+// This file contains styles for all form elements and components in the 
+// Interaction Management System. It provides consistent styling for inputs, 
+// selects, checkboxes, radio buttons, and form layouts with support for 
+// validation states, responsive design, and accessibility compliance.
+//
+// =============================================================================
+
+// Import variables and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// FORM CONTAINERS AND LAYOUT
+// =============================================================================
+
+.form-container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: $spacing-4;
+}
+
+.form-group {
+  margin-bottom: $spacing-4;
+  position: relative;
+}
+
+.form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -$spacing-2;
+  margin-left: -$spacing-2;
+}
+
+.form-col {
+  flex: 1 0 100%;
+  padding-right: $spacing-2;
+  padding-left: $spacing-2;
+  
+  @include respond-to(md) {
+    flex: 1 0 0%;
+  }
+}
+
+// =============================================================================
+// LABELS
+// =============================================================================
+
+.form-label {
+  display: block;
+  margin-bottom: $spacing-1;
+  font-weight: $font-weight-medium;
+  color: $text-primary;
+  
+  &.required::after {
+    content: '*';
+    display: inline-block;
+    margin-left: $spacing-1;
+    color: $danger;
+  }
+}
+
+// =============================================================================
+// FORM CONTROLS (INPUTS, SELECTS, TEXTAREAS)
+// =============================================================================
+
+.form-control {
+  display: block;
+  width: 100%;
+  height: 2.5rem;
+  padding: $spacing-2 $spacing-3;
+  font-size: $font-size-md;
+  font-weight: $font-weight-regular;
+  line-height: 1.5;
+  color: $input-text;
+  background-color: $input-background;
+  background-clip: padding-box;
+  border: 1px solid $input-border;
+  border-radius: $border-radius-md;
+  transition: $transition-base;
+  
+  &:focus {
+    outline: 0;
+    border-color: $input-focus-border;
+    box-shadow: 0 0 0 3px $focus-ring;
+  }
+  
+  &:disabled, &[readonly] {
+    background-color: $input-disabled-background;
+    color: $input-disabled-text;
+    opacity: $disabled-opacity;
+    cursor: not-allowed;
+  }
+  
+  &::placeholder {
+    color: $input-placeholder;
+    opacity: 1;
+  }
+  
+  &.is-invalid {
+    border-color: $input-error-border;
+    padding-right: calc(1.5em + 0.75rem);
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23EF4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23EF4444' stroke='none'/%3e%3c/svg%3e");
+  }
+}
+
+// Size variants
+.form-control-lg {
+  height: 3rem;
+  padding: $spacing-3 $spacing-4;
+  font-size: $font-size-lg;
+}
+
+.form-control-sm {
+  height: 2rem;
+  padding: $spacing-1 $spacing-2;
+  font-size: $font-size-sm;
+}
+
+// Textarea adjustments
+textarea.form-control {
+  height: auto;
+  min-height: 6rem;
+  resize: vertical;
+}
+
+// Select styling
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%236B7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right $spacing-3 center;
+  background-size: 16px 12px;
+  padding-right: $spacing-8;
+}
+
+// =============================================================================
+// CHECKBOXES AND RADIO BUTTONS
+// =============================================================================
+
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: $spacing-2;
+}
+
+.form-check-input {
+  width: 1rem;
+  height: 1rem;
+  margin-right: $spacing-2;
+}
+
+.form-check-label {
+  margin-bottom: 0;
+  font-weight: $font-weight-regular;
+}
+
+// Custom styled checkboxes
+.custom-checkbox .form-check-input {
+  position: relative;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid $input-border;
+  border-radius: $border-radius-sm;
+  background-color: $input-background;
+  transition: $transition-base;
+  cursor: pointer;
+  
+  &:checked {
+    background-color: $primary;
+    border-color: $primary;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+  }
+  
+  &:focus-visible {
+    @include focus-visible($primary);
+  }
+}
+
+// Custom styled radio buttons
+.custom-radio .form-check-input {
+  position: relative;
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 1px solid $input-border;
+  border-radius: 50%;
+  background-color: $input-background;
+  transition: $transition-base;
+  cursor: pointer;
+  
+  &:checked {
+    background-color: $primary;
+    border-color: $primary;
+    
+    &::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0.5em;
+      height: 0.5em;
+      border-radius: 50%;
+      background-color: white;
+    }
+  }
+  
+  &:focus-visible {
+    @include focus-visible($primary);
+  }
+}
+
+// =============================================================================
+// VALIDATION STATES
+// =============================================================================
+
+.form-group.has-error {
+  .form-control {
+    border-color: $input-error-border;
+  }
+  
+  .form-label {
+    color: $input-error-text;
+  }
+}
+
+// =============================================================================
+// HELPER TEXT AND ERROR MESSAGES
+// =============================================================================
+
+.form-text {
+  display: block;
+  margin-top: $spacing-1;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.form-error {
+  display: block;
+  margin-top: $spacing-1;
+  font-size: $font-size-sm;
+  color: $input-error-text;
+}
+
+// =============================================================================
+// FORM ACTIONS
+// =============================================================================
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: $spacing-6;
+  gap: $spacing-3;
+  
+  @media (max-width: map-get($breakpoints, 'sm')) {
+    flex-direction: column;
+    
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
+// =============================================================================
+// DATE AND TIME PICKER
+// =============================================================================
+
+.date-time-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+}
+
+.date-input,
+.time-input {
+  flex: 1 0 auto;
+  min-width: 140px;
+}
+
+.timezone-select {
+  flex: 1 0 100%;
+  margin-top: $spacing-2;
+  
+  @include respond-to(md) {
+    flex: 1 0 auto;
+    margin-top: 0;
+  }
+}
+
+// =============================================================================
+// RESPONSIVE ADJUSTMENTS
+// =============================================================================
+
+@include respond-to(sm) {
+  .form-group {
+    margin-bottom: $spacing-4;
+  }
+}
+
+@include respond-to(lg) {
+  .form-container {
+    padding: $spacing-6;
+  }
+  
+  .form-group {
+    margin-bottom: $spacing-6;
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// =============================================================================
+
+// Improved focus styles for keyboard navigation
+.form-control:focus-visible,
+.form-check-input:focus-visible {
+  @include focus-visible;
+}
+
+// High contrast mode adjustments
+@media (forced-colors: active) {
+  .form-control,
+  .form-check-input {
+    border: 1px solid ButtonText;
+  }
+  
+  .form-control:focus,
+  .form-check-input:focus {
+    outline: 2px solid Highlight;
+  }
+}
