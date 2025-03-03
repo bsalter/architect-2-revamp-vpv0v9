@@ -1,0 +1,23 @@
+<div class="search-input-container">
+  <div class="input-wrapper">
+    <span class="search-icon" aria-hidden="true">🔍</span>
+    <input
+      type="text"
+      class="search-input"
+      [formControl]="searchControl"
+      [placeholder]="placeholder"
+      (keyup.enter)="onSearch()"
+      aria-label="Search"
+      autocomplete="off"
+    />
+    <button
+      *ngIf="searchControl.value"
+      type="button"
+      class="clear-button"
+      (click)="clearSearch($event)"
+      aria-label="Clear search"
+    >
+      ✕
+    </button>
+  </div>
+</div>
