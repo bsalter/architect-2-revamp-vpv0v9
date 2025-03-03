@@ -1,0 +1,109 @@
+// =============================================================================
+// CARD COMPONENTS
+// =============================================================================
+//
+// This partial defines styles for card components used throughout the
+// Interaction Management System application. Cards are used to display
+// contained content with a consistent visual treatment, particularly
+// important for mobile responsive views where tabular data is presented
+// in a card format.
+//
+// =============================================================================
+
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+// Base card component styling with subtle elevation and border
+.card {
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-sm;
+  padding: $spacing-4;
+  margin-bottom: $spacing-4;
+  transition: box-shadow 0.2s ease-in-out;
+  border: 1px solid $border;
+}
+
+// Elevated card variant with more pronounced shadow
+.card--elevated {
+  box-shadow: $shadow-md;
+}
+
+// Flat card variant without shadow, only using border
+.card--flat {
+  box-shadow: none;
+  border: 1px solid $border;
+}
+
+// Interactive card that responds to hover and click
+.card--interactive {
+  cursor: pointer;
+  
+  &:hover {
+    box-shadow: $shadow-md;
+    transform: translateY(-2px);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// Card header section with bottom border
+.card__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-3;
+  padding-bottom: $spacing-2;
+  border-bottom: 1px solid lighten($border, 10%);
+}
+
+// Card title styling
+.card__title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: $text-primary;
+  margin: 0;
+}
+
+// Main content area of the card
+.card__content {
+  margin-bottom: $spacing-3;
+}
+
+// Card footer section with top border
+.card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-top: $spacing-2;
+  margin-top: $spacing-3;
+  border-top: 1px solid lighten($border, 10%);
+}
+
+// Specific styling for interaction cards in the finder view,
+// particularly important for mobile adaptation
+.card--interaction {
+  display: flex;
+  flex-direction: column;
+  
+  @media (max-width: 767px) {
+    margin-bottom: $spacing-3;
+  }
+}
+
+// Metadata display within cards (like dates, user info)
+.card__meta {
+  display: flex;
+  align-items: center;
+  color: $text-secondary;
+  font-size: 0.875rem;
+  margin-bottom: $spacing-2;
+}
+
+// Container for action buttons within a card
+.card__actions {
+  display: flex;
+  gap: $spacing-2;
+}
