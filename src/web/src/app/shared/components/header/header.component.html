@@ -1,0 +1,66 @@
+<header class="app-header">
+  <div class="header-container">
+    <!-- Left section with logo and mobile menu toggle -->
+    <div class="header-left">
+      <div class="logo">
+        <a routerLink="/dashboard" (click)="navigateTo('/dashboard')">
+          <img src="assets/images/logo-full.svg" alt="Interaction Management System">
+        </a>
+      </div>
+      <button class="menu-toggle md:hidden" (click)="toggleMenu()" aria-label="Toggle navigation menu">
+        <i class="menu-icon">≡</i>
+      </button>
+    </div>
+
+    <!-- Main navigation -->
+    <nav class="main-nav" [class.open]="isMenuOpen" aria-label="Main navigation">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/dashboard" routerLinkActive="active" (click)="navigateTo('/dashboard')">Dashboard</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/interactions" routerLinkActive="active" (click)="navigateTo('/interactions')">Interactions</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Right section with site selector and user menu -->
+    <div class="header-right">
+      <!-- Site selector component -->
+      <div class="site-selector" *ngIf="hasSiteSelectionFeature()">
+        <button class="site-dropdown-toggle" (click)="toggleSiteDropdown()" aria-label="Select site">
+          <span class="site-name">{{ currentSite?.name || 'Select Site' }}</span>
+          <i class="dropdown-arrow">▼</i>
+        </button>
+        <ul class="site-dropdown" [class.open]="isSiteDropdownOpen">
+          <li *ngFor="let site of availableSites" [class.active]="site.id === currentSite?.id">
+            <a href="javascript:void(0)" (click)="switchSite(site)">{{ site.name }}</a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- User menu component -->
+      <div class="user-menu">
+        <button class="user-dropdown-toggle" (click)="toggleUserDropdown()" aria-label="User options">
+          <span class="user-avatar">👤</span>
+          <span class="username md:inline hidden">{{ currentUser?.username }}</span>
+          <i class="dropdown-arrow">▼</i>
+        </button>
+        <ul class="user-dropdown" [class.open]="isUserDropdownOpen">
+          <li class="user-info">
+            <span class="username-full">{{ currentUser?.username }}</span>
+            <span class="user-email">{{ currentUser?.email }}</span>
+          </li>
+          <li>
+            <a href="javascript:void(0)" (click)="logout()">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breadcrumbs navigation -->
+  <div class="breadcrumb-container">
+    <app-breadcrumb></app-breadcrumb>
+  </div>
+</header>
