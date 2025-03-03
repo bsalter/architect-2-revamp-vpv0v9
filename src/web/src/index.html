@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!--
+    This HTML file is the entry point for the Interaction Management System.
+    It configures the document structure, loads required resources, and
+    bootstraps the Angular application.
+
+    Requirements Addressed:
+    - Single Page Application: Serves as the container for the Angular SPA.
+    - Browser Compatibility: Includes meta tags and polyfills for cross-browser rendering.
+    - Accessibility Compliance: Sets language attribute and viewport settings for accessibility.
+  -->
+  <meta charset="utf-8">
+  <title>Interaction Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Interaction Management System - Track and manage interactions across multiple sites">
+  <!-- Base URL for the application -->
+  <base href="/">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- Google Fonts - Inter Font vLatest -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles/main.scss">
+
+</head>
+
+<body>
+  <!--
+    Root component element where Angular bootstraps the application.
+    The "Loading..." text is displayed while the Angular application is initializing.
+  -->
+  <app-root>Loading...</app-root>
+  <noscript>
+    <!--
+      Fallback message for users with JavaScript disabled.
+      This message ensures that users are informed that JavaScript is required to run the application.
+    -->
+    <p>This application requires JavaScript to be enabled in your browser.</p>
+  </noscript>
+
+  <!-- Polyfills -->
+  <script src="polyfills.ts"></script>
+
+  <!-- Main Script -->
+  <script src="main.ts"></script>
+</body>
+
+</html>
