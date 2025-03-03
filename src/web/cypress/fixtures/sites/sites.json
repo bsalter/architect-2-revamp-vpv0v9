@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "name": "Headquarters",
+    "description": "Main corporate headquarters",
+    "createdAt": "2023-06-01T08:00:00Z",
+    "updatedAt": "2023-06-01T08:00:00Z",
+    "userCount": 12,
+    "interactionCount": 87
+  },
+  {
+    "id": 2,
+    "name": "Northwest Regional Office",
+    "description": "Regional office serving the northwest territory",
+    "createdAt": "2023-06-01T09:15:00Z",
+    "updatedAt": "2023-06-15T14:30:00Z",
+    "userCount": 8,
+    "interactionCount": 56
+  },
+  {
+    "id": 3,
+    "name": "Southwest Regional Office",
+    "description": "Regional office serving the southwest territory",
+    "createdAt": "2023-06-02T10:45:00Z",
+    "updatedAt": "2023-06-10T16:20:00Z",
+    "userCount": 6,
+    "interactionCount": 42
+  },
+  {
+    "id": 4,
+    "name": "Eastern Division",
+    "description": "Regional office serving the eastern territory",
+    "createdAt": "2023-06-03T11:30:00Z",
+    "updatedAt": "2023-06-12T09:45:00Z",
+    "userCount": 9,
+    "interactionCount": 63
+  }
+]
