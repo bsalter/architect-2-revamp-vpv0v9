@@ -1,0 +1,339 @@
+// Import design tokens and utility mixins
+@import '../../../../styles/abstracts/variables';
+@import '../../../../styles/abstracts/mixins';
+
+// Main container for the finder table component
+.finder-table-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+// Desktop view with AG Grid
+.desktop-view {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  
+  // Hide on mobile screens
+  @include respond-to(xs) {
+    display: none;
+  }
+  
+  // Custom AG Grid styling
+  ::ng-deep {
+    // Alpine theme customization for AG Grid
+    .ag-theme-alpine {
+      --ag-header-height: 48px;
+      --ag-row-height: 48px;
+      --ag-header-background-color: #{$background};
+      --ag-odd-row-background-color: rgba(0, 0, 0, 0.02);
+      --ag-row-hover-color: rgba($primary, 0.05);
+      --ag-selected-row-background-color: rgba($primary, 0.1);
+      --ag-header-foreground-color: #{$text-secondary};
+      --ag-font-family: #{$font-family-base};
+      --ag-font-size: #{$font-size-md};
+      --ag-border-color: #{$border};
+      
+      // Ensure proper height
+      height: 100%;
+      width: 100%;
+      
+      // Header row styling
+      .ag-header {
+        border-bottom: 1px solid $border;
+        
+        .ag-header-cell {
+          padding: $spacing-3;
+          
+          // Sort indicator styling
+          .ag-header-cell-label {
+            .ag-header-icon {
+              color: $primary;
+            }
+          }
+        }
+      }
+      
+      // Row styling
+      .ag-row {
+        border-bottom: 1px solid $border;
+        cursor: pointer;
+        transition: $transition-base;
+        
+        &.ag-row-selected {
+          background-color: rgba($primary, 0.1);
+        }
+        
+        .ag-cell {
+          padding: $spacing-3;
+          
+          // Cell content alignment
+          display: flex;
+          align-items: center;
+        }
+      }
+      
+      // Action buttons in the grid
+      .action-button {
+        background: none;
+        border: none;
+        padding: $spacing-1 $spacing-2;
+        color: $primary;
+        cursor: pointer;
+        border-radius: $border-radius-md;
+        transition: $transition-base;
+        margin-right: $spacing-2;
+        
+        &:hover {
+          background-color: rgba($primary, 0.1);
+        }
+        
+        &.delete-button {
+          color: $danger;
+          
+          &:hover {
+            background-color: rgba($danger, 0.1);
+          }
+        }
+      }
+      
+      // Type badge rendering in the grid
+      .cell-badge {
+        .type-badge {
+          // Badge styling inherits from global .type-badge
+        }
+      }
+      
+      // No rows overlay
+      .ag-overlay-no-rows-center {
+        padding: $spacing-10;
+        color: $text-secondary;
+        
+        .ag-overlay-loading-center {
+          background-color: $surface;
+          padding: $spacing-5;
+          border-radius: $border-radius-md;
+          @include elevation(1);
+        }
+      }
+    }
+  }
+}
+
+// Mobile card view
+.mobile-view {
+  display: none;
+  width: 100%;
+  overflow-y: auto;
+  padding: $spacing-2;
+  
+  // Show on mobile screens
+  @include respond-to(xs) {
+    display: block;
+  }
+}
+
+// Interaction card for mobile view
+.interaction-card {
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  border: 1px solid $border;
+  padding: $spacing-4;
+  margin-bottom: $spacing-3;
+  cursor: pointer;
+  @include elevation(1);
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+    @include elevation(2);
+  }
+  
+  .card-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-2;
+    @include truncate-text(1);
+  }
+  
+  .card-metadata {
+    display: flex;
+    align-items: center;
+    margin-bottom: $spacing-2;
+    
+    .type-badge {
+      margin-right: $spacing-2;
+    }
+    
+    .lead {
+      font-weight: $font-weight-medium;
+    }
+  }
+  
+  .card-datetime {
+    font-family: monospace;
+    margin-bottom: $spacing-2;
+    color: $text-secondary;
+  }
+  
+  .card-location {
+    color: $text-secondary;
+    margin-bottom: $spacing-3;
+    @include truncate-text(1);
+  }
+  
+  .card-actions {
+    @include flex(row, flex-end, center);
+    
+    button {
+      margin-left: $spacing-2;
+      background: none;
+      border: none;
+      padding: $spacing-1 $spacing-2;
+      border-radius: $border-radius-md;
+      transition: $transition-base;
+      cursor: pointer;
+      
+      &.edit-button {
+        color: $primary;
+        
+        &:hover {
+          background-color: rgba($primary, 0.1);
+        }
+      }
+      
+      &.delete-button {
+        color: $danger;
+        
+        &:hover {
+          background-color: rgba($danger, 0.1);
+        }
+      }
+    }
+  }
+}
+
+// Type badge styling
+.type-badge {
+  display: inline-block;
+  padding: $spacing-1 $spacing-2;
+  border-radius: $border-radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  text-transform: uppercase;
+  
+  &.Meeting {
+    background-color: rgba($primary, 0.15);
+    color: $primary;
+  }
+  
+  &.Call {
+    background-color: rgba($success, 0.15);
+    color: $success;
+  }
+  
+  &.Email {
+    background-color: rgba($warning, 0.15);
+    color: $warning;
+  }
+  
+  &.Other {
+    background-color: rgba($secondary, 0.15);
+    color: $secondary;
+  }
+}
+
+// Pagination controls
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-3;
+  border-top: 1px solid $border;
+  background-color: $surface;
+  
+  .results-info {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    
+    .page-number {
+      display: inline-block;
+      padding: $spacing-1 $spacing-2;
+      margin: 0 $spacing-1;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+      transition: $transition-base;
+      
+      &:hover {
+        background-color: rgba($primary, 0.1);
+      }
+      
+      &.active {
+        background-color: $primary;
+        color: white;
+        
+        &:hover {
+          background-color: $primary;
+        }
+      }
+    }
+    
+    .page-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: $border-radius-md;
+      cursor: pointer;
+      transition: $transition-base;
+      
+      &:hover {
+        background-color: rgba($primary, 0.1);
+      }
+      
+      &.disabled {
+        opacity: $disabled-opacity;
+        cursor: not-allowed;
+        
+        &:hover {
+          background-color: transparent;
+        }
+      }
+    }
+    
+    .pagination-ellipsis {
+      margin: 0 $spacing-1;
+    }
+  }
+  
+  // Mobile pagination layout
+  @include respond-to(xs) {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .results-info {
+      margin-bottom: $spacing-2;
+    }
+    
+    .pagination-controls {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+// Empty state message
+.no-results {
+  text-align: center;
+  padding: $spacing-10;
+  color: $text-secondary;
+}
