@@ -1,0 +1,367 @@
+// Import design tokens for consistent styling
+@import '../../../../styles/abstracts/_variables';
+@import '../../../../styles/abstracts/_mixins';
+
+// Main container for the interaction finder page
+.interaction-finder-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background-color: $background;
+}
+
+// Header section containing title and action buttons
+.interaction-finder-header {
+  padding: $spacing-4;
+  border-bottom: 1px solid $border;
+  background-color: $surface;
+
+  .page-title-container {
+    @include flex(row, space-between, center);
+    margin-bottom: $spacing-2;
+
+    h1 {
+      font-size: $font-size-2xl;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin: 0;
+    }
+
+    .create-btn {
+      display: flex;
+      align-items: center;
+      gap: $spacing-2;
+      background-color: $primary;
+      color: white;
+      border: none;
+      border-radius: $border-radius-md;
+      padding: $spacing-2 $spacing-4;
+      font-weight: $font-weight-medium;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: darken($primary, 10%);
+      }
+    }
+  }
+
+  @include respond-to(xs) {
+    padding: $spacing-3;
+
+    .page-title-container {
+      h1 {
+        font-size: $font-size-xl;
+      }
+
+      .create-btn {
+        padding: $spacing-2 $spacing-3;
+        font-size: $font-size-sm;
+      }
+    }
+  }
+}
+
+// Search and filter controls container
+.search-filter-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-4;
+  background-color: $surface;
+  border-bottom: 1px solid $border;
+
+  .search-container {
+    flex: 1 1 auto;
+    max-width: 500px;
+    margin-right: $spacing-4;
+
+    input[type="search"] {
+      width: 100%;
+      padding: $spacing-2 $spacing-3 $spacing-2 $spacing-8;
+      border: 1px solid $border;
+      border-radius: $border-radius-md;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: $spacing-3 center;
+      background-size: $spacing-4 $spacing-4;
+      font-size: $font-size-md;
+      color: $text-primary;
+
+      &:focus {
+        outline: none;
+        border-color: $primary;
+        box-shadow: 0 0 0 2px rgba($primary, 0.2);
+      }
+    }
+  }
+
+  .filter-container {
+    @include flex(row, flex-start, center);
+    gap: $spacing-2;
+  }
+
+  .filter-btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    padding: $spacing-2 $spacing-4;
+    border: 1px solid $border;
+    border-radius: $border-radius-md;
+    background-color: $surface;
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &.active {
+      background-color: rgba($primary, 0.1);
+      color: $primary;
+      border-color: $primary;
+    }
+    
+    .filter-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 $spacing-1;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-semibold;
+      color: white;
+      background-color: $primary;
+      border-radius: $border-radius-full;
+    }
+  }
+
+  .refresh-btn {
+    padding: $spacing-2;
+    border: 1px solid $border;
+    border-radius: $border-radius-md;
+    background-color: $surface;
+    color: $text-primary;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: rgba($primary, 0.05);
+    }
+  }
+
+  @include respond-to(xs) {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-3;
+    padding: $spacing-3;
+
+    .search-container {
+      max-width: none;
+      margin-right: 0;
+    }
+
+    .filter-container {
+      justify-content: space-between;
+    }
+  }
+}
+
+// Active filters display bar
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  padding: $spacing-2 $spacing-4;
+  background-color: rgba($primary, 0.05);
+  border-bottom: 1px solid rgba($primary, 0.1);
+  overflow-x: auto;
+
+  .filter-label {
+    color: $text-secondary;
+    margin-right: $spacing-2;
+    font-size: $font-size-sm;
+    white-space: nowrap;
+  }
+
+  .filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background-color: white;
+    border: 1px solid rgba($primary, 0.2);
+    border-radius: $border-radius-full;
+    padding: $spacing-1 $spacing-2;
+    margin-right: $spacing-2;
+    font-size: $font-size-sm;
+    white-space: nowrap;
+
+    .remove-filter {
+      margin-left: $spacing-1;
+      cursor: pointer;
+      color: $text-secondary;
+      
+      &:hover {
+        color: $danger;
+      }
+    }
+  }
+
+  .clear-filters-btn {
+    margin-left: auto;
+    color: $primary;
+    font-size: $font-size-sm;
+    white-space: nowrap;
+    cursor: pointer;
+    
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  @include respond-to(xs) {
+    padding: $spacing-2;
+    flex-wrap: wrap;
+    
+    .filter-chip {
+      margin-bottom: $spacing-1;
+    }
+    
+    .clear-filters-btn {
+      padding: $spacing-1 0;
+    }
+  }
+}
+
+// Table container for interaction finder
+.table-container {
+  flex: 1 1 auto;
+  overflow: hidden;
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  margin: $spacing-4;
+  @include elevation(1);
+
+  // AG Grid will be styled through its component configuration
+  // This container provides the proper spacing and layout
+
+  @include respond-to(xs) {
+    margin: $spacing-2;
+    border-radius: $border-radius-sm;
+    
+    // Mobile card view will be handled by AG Grid configuration
+  }
+}
+
+// Empty state when no results found
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-8;
+  text-align: center;
+  color: $text-secondary;
+
+  p {
+    font-size: $font-size-lg;
+    line-height: $line-height-normal;
+    margin-bottom: $spacing-4;
+    max-width: 500px;
+  }
+
+  button {
+    background-color: transparent;
+    color: $primary;
+    border: 1px solid $primary;
+    border-radius: $border-radius-md;
+    padding: $spacing-2 $spacing-4;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background-color: rgba($primary, 0.05);
+    }
+  }
+}
+
+// Pagination container at bottom of finder
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: $spacing-3 $spacing-4;
+  border-top: 1px solid $border;
+  background-color: $surface;
+
+  .pagination-info {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: $spacing-1;
+
+    .page-number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      border-radius: $border-radius-md;
+      padding: 0 $spacing-2;
+      font-size: $font-size-sm;
+      color: $text-primary;
+      cursor: pointer;
+      
+      &.active {
+        background-color: $primary;
+        color: white;
+      }
+      
+      &:hover:not(.active) {
+        background-color: rgba($primary, 0.05);
+      }
+    }
+
+    .pagination-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: $border-radius-md;
+      color: $text-primary;
+      cursor: pointer;
+      
+      &:hover {
+        background-color: rgba($primary, 0.05);
+      }
+      
+      &.disabled {
+        color: $text-secondary;
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  @include respond-to(xs) {
+    flex-direction: column;
+    gap: $spacing-3;
+    
+    .pagination-info {
+      text-align: center;
+      width: 100%;
+    }
+    
+    .pagination-controls {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
