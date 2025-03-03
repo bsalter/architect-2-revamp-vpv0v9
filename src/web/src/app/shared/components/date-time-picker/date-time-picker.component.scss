@@ -1,0 +1,151 @@
+// Import design tokens and variables
+@import "../../../../styles/abstracts/_variables";
+// Import responsive mixins
+@import "../../../../styles/abstracts/_mixins";
+// Import base form styles
+@import "../../../../styles/components/_forms";
+
+// Main container for the date-time picker component
+.date-time-picker-container {
+  width: 100%;
+  margin-bottom: $spacing-3;
+  position: relative;
+}
+
+// Label styling for the date-time picker
+.date-time-label {
+  display: block;
+  margin-bottom: $spacing-1;
+  font-weight: 500;
+}
+
+// Required field indicator
+.date-time-required {
+  color: $input-error-text;
+  margin-left: $spacing-1;
+}
+
+// Container for all input elements (date, time, timezone)
+.date-time-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  width: 100%;
+}
+
+// Container for the date input field
+.date-input-group {
+  flex: 1 1 140px;
+  min-width: 140px;
+}
+
+// Container for the time input field
+.time-input-group {
+  flex: 0 1 120px;
+  min-width: 100px;
+}
+
+// Container for the timezone dropdown
+.timezone-select-group {
+  flex: 1 1 100%;
+  margin-top: $spacing-1;
+}
+
+// Error message styling
+.date-time-error {
+  display: block;
+  margin-top: $spacing-1;
+  color: $input-error-text;
+  font-size: 0.875rem;
+}
+
+// Base styling for date and time input elements
+input[type="date"], 
+input[type="time"] {
+  width: 100%;
+  padding: $spacing-2;
+  border: 1px solid $input-border;
+  border-radius: $border-radius-md;
+  outline: none;
+}
+
+// Styling for the timezone select dropdown
+select {
+  width: 100%;
+  padding: $spacing-2;
+  border: 1px solid $input-border;
+  border-radius: $border-radius-md;
+  background-color: white;
+  appearance: none;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
+  background-repeat: no-repeat;
+  background-position: right 0.5rem center;
+  background-size: 1rem;
+}
+
+// Responsive styles for medium screens and larger
+@media (min-width: $breakpoint-md) {
+  .date-time-inputs {
+    flex-wrap: nowrap;
+  }
+  
+  .timezone-select-group {
+    flex: 1 1 auto;
+    margin-top: 0;
+  }
+}
+
+// Responsive styles for small mobile screens
+@media (max-width: $breakpoint-sm) {
+  .date-input-group,
+  .time-input-group,
+  .timezone-select-group {
+    flex: 1 1 100%;
+  }
+}
+
+// Styling for invalid input state
+.is-invalid {
+  border-color: $input-error-border !important;
+}
+
+// Focus state styling for inputs and select
+input:focus, 
+select:focus {
+  border-color: $input-focus-border;
+  box-shadow: 0 0 0 3px $focus-ring;
+  outline: none;
+}
+
+// Styling for disabled inputs
+input:disabled, 
+select:disabled {
+  background-color: #f3f4f6;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+// Custom styling for date and time pickers
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+}
+
+// Styling for input placeholders
+input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+}
+
+// Special styling for native date pickers on mobile devices
+.native-date-picker-mobile {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
