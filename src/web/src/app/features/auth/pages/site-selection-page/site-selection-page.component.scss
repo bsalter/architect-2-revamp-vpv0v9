@@ -1,0 +1,37 @@
+@import '../../../../../styles/abstracts/variables';
+@import '../../../../../styles/abstracts/mixins';
+@import '../../../../../styles/pages/auth';
+
+.auth-page-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: $background;
+  padding: $spacing-4;
+  
+  @include respond-to(xs) {
+    padding: $spacing-4;
+  }
+  
+  @include respond-to(md) {
+    padding: $spacing-8;
+  }
+}
+
+.page-content {
+  width: 100%;
+  max-width: 450px;
+  background-color: $surface;
+  border-radius: 0.5rem;
+  box-shadow: $shadow-md;
+  padding: $spacing-8;
+  
+  @include respond-to(xs) {
+    padding: $spacing-4;
+  }
+  
+  @include respond-to(sm) {
+    padding: $spacing-8;
+  }
+}
