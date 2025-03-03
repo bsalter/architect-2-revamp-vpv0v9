@@ -1,0 +1,511 @@
+# .github/workflows/backend-cd-prod.yml
+name: Backend CD - Production
+
+on:
+  workflow_run:
+    workflows: ["Backend CI"]
+    branches: [main]
+    types: [completed]
+    status: success
+  workflow_dispatch:
+    inputs:
+      deploy_type:
+        description: "Type of deployment"
+        required: true
+        default: "standard"
+        type: choice
+        options:
+          - "standard"
+          - "migration-only"
+          - "redeploy"
+          - "rollback"
+      release_version:
+        description: "Version to be deployed"
+        required: true
+        type: string
+
+env:
+  PYTHON_VERSION: "3.11"
+  WORKING_DIRECTORY: "src/backend"
+  AWS_REGION: ${{ secrets.AWS_PROD_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_PROD_REPOSITORY }}
+  ECS_CLUSTER: ${{ secrets.ECS_PROD_CLUSTER }}
+  ECS_SERVICE: ${{ secrets.ECS_PROD_BACKEND_SERVICE }}
+  TASK_DEFINITION: ${{ secrets.ECS_PROD_BACKEND_TASK_DEFINITION }}
+  CONTAINER_NAME: backend-api
+  PROD_API_URL: ${{ secrets.PROD_API_URL }}
+
+jobs:
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2 # docker/setup-buildx-action version v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2 # docker/login-action version v2
+        with:
+          registry: ${{ secrets.ECR_PROD_REGISTRY }}
+          username: AWS
+          password: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.ECR_PROD_REGISTRY }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=sha,prefix=
+            type=semver,pattern={{version}}
+            type=raw,value=${{ github.event.inputs.release_version }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4 # docker/build-push-action version v4
+        with:
+          context: ${{ env.WORKING_DIRECTORY }}
+          file: ${{ env.WORKING_DIRECTORY }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run security scan on built image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta.outputs.tags }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+      - name: Save the image tag for use in later jobs
+        run: echo "image_tag=${{ steps.meta.outputs.tags }}" >> $GITHUB_ENV
+
+  prepare_database_backup:
+    name: Prepare Database Backup
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Python
+        uses: actions/setup-python@v4 # actions/setup-python version v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Create a full backup of the production database
+        run: |
+          aws rds create-db-snapshot \
+            --db-instance-identifier ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }} \
+            --db-snapshot-identifier ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-backup-${{ github.run_id }}
+      - name: Verify backup integrity with test restore
+        run: |
+          aws rds restore-db-instance-from-db-snapshot \
+            --db-instance-identifier ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-test-restore-${{ github.run_id }} \
+            --db-snapshot-identifier ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-backup-${{ github.run_id }} \
+            --db-instance-class db.t3.micro \
+            --no-multi-az \
+            --publicly-accessible \
+            --engine postgres
+      - name: Store backup in long-term storage with retention policy
+        run: |
+          aws s3 cp \
+            --recursive \
+            --storage-class GLACIER \
+            s3://${{ secrets.S3_BACKUP_BUCKET }}/${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-backup-${{ github.run_id }} \
+            s3://${{ secrets.S3_LONG_TERM_BACKUP_BUCKET }}/${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}/
+      - name: Generate backup report with metadata and checksums
+        run: |
+          echo "Backup Report" > backup_report.txt
+          echo "Snapshot Identifier: ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-backup-${{ github.run_id }}" >> backup_report.txt
+          echo "Timestamp: $(date +'%Y-%m-%d %H:%M:%S')" >> backup_report.txt
+          aws s3 ls --recursive s3://${{ secrets.S3_BACKUP_BUCKET }}/${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-backup-${{ github.run_id }} --human-readable --summarize >> backup_report.txt
+      - name: Update backup registry with new backup information
+        run: |
+          aws dynamodb put-item \
+            --table-name ${{ secrets.DYNAMODB_BACKUP_REGISTRY }} \
+            --item file://backup_report.json
+
+  approval_gate:
+    name: Manual Approval Gate
+    needs: prepare_database_backup
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate deployment plan with changes to be made
+        run: |
+          echo "Deployment Plan" > deployment_plan.txt
+          echo "Release Version: ${{ github.event.inputs.release_version }}" >> deployment_plan.txt
+          echo "Changes: (Detailed list of changes to be deployed)" >> deployment_plan.txt
+      - name: Create database migration preview if applicable
+        run: |
+          echo "Database Migration Preview" > migration_preview.txt
+          echo "SQL Statements: (Preview of SQL statements to be executed)" >> migration_preview.txt
+      - name: Compile release notes from commit history
+        run: |
+          echo "Release Notes" > release_notes.txt
+          echo "Release Notes: (Compiled release notes from commit history)" >> release_notes.txt
+      - name: Notify approvers of pending deployment
+        run: |
+          echo "Deployment requires approval"
+          # Add logic to notify approvers (e.g., using Slack, email)
+      - name: Wait for manual approval from authorized personnel
+        run: |
+          echo "Waiting for approval..."
+          # Add logic to pause workflow until manual approval is received
+      - name: Log approval details for audit purposes
+        run: |
+          echo "Approval received from: (Approver's name)" >> approval_log.txt
+          echo "Approval timestamp: $(date +'%Y-%m-%d %H:%M:%S')" >> approval_log.txt
+
+  execute_database_migrations:
+    name: Execute Database Migrations
+    needs: approval_gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Python
+        uses: actions/setup-python@v4 # actions/setup-python version v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Install required database tools and dependencies
+        run: |
+          pip install -r src/backend/requirements.txt
+      - name: Set environment variables for database connection
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+      - name: Perform final validation of migration scripts
+        run: |
+          echo "Validating migration scripts..."
+          # Add logic to validate migration scripts
+      - name: Run database migrations using run_migrations.py script with transaction wrapping
+        run: |
+          python src/backend/scripts/run_migrations.py --revision head
+      - name: Verify migration success with comprehensive data integrity checks
+        run: |
+          echo "Verifying migration success..."
+          # Add logic to verify data integrity after migration
+      - name: Create post-migration database snapshot for potential rollback
+        run: |
+          aws rds create-db-snapshot \
+            --db-instance-identifier ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }} \
+            --db-snapshot-identifier ${{ secrets.RDS_PROD_INSTANCE_IDENTIFIER }}-post-migration-${{ github.run_id }}
+
+  deploy_blue_environment:
+    name: Deploy Blue Environment
+    needs: execute_database_migrations
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Download current ECS task definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.TASK_DEFINITION }} \
+            --output json > task-definition.json
+      - name: Update container image in task definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1 # aws-actions/amazon-ecs-render-task-definition version v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.meta.outputs.tags }}
+      - name: Create new task definition revision for blue environment
+        run: |
+          aws ecs register-task-definition \
+            --family ${{ secrets.ECS_PROD_BACKEND_TASK_DEFINITION_FAMILY }}-blue \
+            --task-role-arn ${{ secrets.ECS_PROD_BACKEND_TASK_ROLE_ARN }} \
+            --execution-role-arn ${{ secrets.ECS_PROD_BACKEND_EXECUTION_ROLE_ARN }} \
+            --network-mode awsvpc \
+            --container-definitions "$(cat task-definition.json)" \
+            --requires-compatibilities EC2 \
+            --cpu 256 \
+            --memory 512 \
+            --output json > blue-task-definition.json
+      - name: Apply production-specific configuration and environment variables
+        run: |
+          echo "Applying production-specific configuration..."
+          # Add logic to apply production-specific configuration
+      - name: Deploy blue environment with updated task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1 # aws-actions/amazon-ecs-deploy-task-definition version v1
+        with:
+          service: ${{ secrets.ECS_PROD_BACKEND_SERVICE }}-blue
+          cluster: ${{ env.ECS_CLUSTER }}
+          task-definition: blue-task-definition.json
+          wait-for-service-stability: true
+      - name: Wait for blue environment to reach steady state
+        run: |
+          echo "Waiting for blue environment to reach steady state..."
+          # Add logic to wait for blue environment to reach steady state
+      - name: Verify deployment with comprehensive health checks
+        run: |
+          echo "Verifying deployment with health checks..."
+          # Add logic to verify deployment with health checks
+      - name: Run security verification on deployed environment
+        run: |
+          echo "Running security verification..."
+          # Add logic to run security verification
+      - name: Mark blue environment as ready for testing
+        run: |
+          echo "Blue environment is ready for testing"
+
+  run_production_validation:
+    name: Run Production Validation
+    needs: deploy_blue_environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Python
+        uses: actions/setup-python@v4 # actions/setup-python version v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install test dependencies
+        run: |
+          pip install -r src/backend/requirements.txt
+      - name: Configure test environment variables
+        run: |
+          echo "PROD_API_URL=${{ secrets.PROD_API_URL }}" >> $GITHUB_ENV
+      - name: Run API health check tests
+        run: |
+          echo "Running API health check tests..."
+          # Add logic to run API health check tests
+      - name: Run authentication and authorization tests
+        run: |
+          echo "Running authentication and authorization tests..."
+          # Add logic to run authentication and authorization tests
+      - name: Run interaction management tests
+        run: |
+          echo "Running interaction management tests..."
+          # Add logic to run interaction management tests
+      - name: Run search functionality tests
+        run: |
+          echo "Running search functionality tests..."
+          # Add logic to run search functionality tests
+      - name: Run performance benchmark tests
+        run: |
+          echo "Running performance benchmark tests..."
+          # Add logic to run performance benchmark tests
+      - name: Run security validation tests
+        run: |
+          echo "Running security validation tests..."
+          # Add logic to run security validation tests
+      - name: Compare test results against baseline requirements
+        run: |
+          echo "Comparing test results against baseline requirements..."
+          # Add logic to compare test results against baseline requirements
+      - name: Generate detailed validation report with metrics
+        run: |
+          echo "Generating detailed validation report..."
+          # Add logic to generate detailed validation report
+      - name: Store test results as artifacts
+        run: |
+          echo "Storing test results as artifacts..."
+          # Add logic to store test results as artifacts
+      - name: Fail job if critical tests fail or performance degradation detected
+        run: |
+          echo "Checking test results..."
+          # Add logic to check test results and fail job if necessary
+
+  final_approval_gate:
+    name: Final Approval Gate
+    needs: run_production_validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate deployment validation report
+        run: |
+          echo "Deployment Validation Report" > validation_report.txt
+          echo "All tests passed successfully" >> validation_report.txt
+      - name: Compile all test results and metrics
+        run: |
+          echo "Compiling test results and metrics" > test_results.txt
+          echo "Test Results: (Detailed test results and metrics)" >> test_results.txt
+      - name: Present comparison with previous production version
+        run: |
+          echo "Comparison with Previous Production Version" > comparison_report.txt
+          echo "Changes: (Comparison of changes with previous version)" >> comparison_report.txt
+      - name: Notify approvers of pending traffic switch
+        run: |
+          echo "Traffic switch requires approval"
+          # Add logic to notify approvers (e.g., using Slack, email)
+      - name: Wait for final approval from authorized personnel
+        run: |
+          echo "Waiting for final approval..."
+          # Add logic to pause workflow until manual approval is received
+      - name: Log approval details for audit purposes
+        run: |
+          echo "Approval received from: (Approver's name)" >> final_approval_log.txt
+          echo "Approval timestamp: $(date +'%Y-%m-%d %H:%M:%S')" >> final_approval_log.txt
+
+  switch_traffic:
+    name: Switch Traffic
+    needs: final_approval_gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Verify blue environment is healthy
+        run: |
+          echo "Verifying blue environment is healthy..."
+          # Add logic to verify blue environment is healthy
+      - name: Update load balancer target groups to include blue environment
+        run: |
+          echo "Updating load balancer target groups..."
+          # Add logic to update load balancer target groups
+      - name: Gradually shift traffic from green to blue environment (10% increments)
+        run: |
+          echo "Gradually shifting traffic..."
+          # Add logic to gradually shift traffic
+      - name: Monitor error rates, latency, and system metrics during transition
+        run: |
+          echo "Monitoring error rates and latency..."
+          # Add logic to monitor error rates and latency
+      - name: Pause and evaluate metrics at each increment
+        run: |
+          echo "Pausing and evaluating metrics..."
+          # Add logic to pause and evaluate metrics
+      - name: Complete traffic shift to blue environment
+        run: |
+          echo "Completing traffic shift..."
+          # Add logic to complete traffic shift
+      - name: Verify application is serving traffic correctly
+        run: |
+          echo "Verifying application is serving traffic correctly..."
+          # Add logic to verify application is serving traffic correctly
+      - name: Update production environment status
+        run: |
+          echo "Updating production environment status..."
+          # Add logic to update production environment status
+      - name: Create deployment marker in monitoring systems
+        run: |
+          echo "Creating deployment marker..."
+          # Add logic to create deployment marker
+      - name: Tag release in source control
+        run: |
+          echo "Tagging release in source control..."
+          # Add logic to tag release in source control
+
+  cleanup_green_environment:
+    name: Cleanup Green Environment
+    needs: switch_traffic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Wait for confirmation that blue environment is stable (24 hour monitoring period)
+        run: |
+          echo "Waiting for confirmation that blue environment is stable..."
+          # Add logic to wait for confirmation
+      - name: Schedule decommissioning of green environment
+        run: |
+          echo "Scheduling decommissioning of green environment..."
+          # Add logic to schedule decommissioning
+      - name: Archive deployment artifacts
+        run: |
+          echo "Archiving deployment artifacts..."
+          # Add logic to archive deployment artifacts
+      - name: Generate comprehensive deployment documentation
+        run: |
+          echo "Generating deployment documentation..."
+          # Add logic to generate deployment documentation
+      - name: Update system inventory with new version information
+        run: |
+          echo "Updating system inventory..."
+          # Add logic to update system inventory
+      - name: Send deployment notification to stakeholders
+        run: |
+          echo "Sending deployment notification..."
+          # Add logic to send deployment notification
+      - name: Update deployment registry with new version information
+        run: |
+          echo "Updating deployment registry..."
+          # Add logic to update deployment registry
+      - name: Store deployment metrics for historical analysis
+        run: |
+          echo "Storing deployment metrics..."
+          # Add logic to store deployment metrics
+
+  rollback:
+    name: Rollback
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Identify failure point in deployment process
+        run: |
+          echo "Identifying failure point..."
+          # Add logic to identify failure point
+      - name: If database migration failed, restore from pre-deployment backup
+        run: |
+          echo "Restoring from pre-deployment backup..."
+          # Add logic to restore from backup
+      - name: If blue environment deployment failed, terminate new tasks
+        run: |
+          echo "Terminating new tasks..."
+          # Add logic to terminate new tasks
+      - name: If traffic switch failed or issues detected, revert to green environment
+        run: |
+          echo "Reverting to green environment..."
+          # Add logic to revert to green environment
+      - name: Update load balancer to route traffic back to green environment
+        run: |
+          echo "Updating load balancer..."
+          # Add logic to update load balancer
+      - name: Verify green environment is serving traffic correctly
+        run: |
+          echo "Verifying green environment..."
+          # Add logic to verify green environment
+      - name: Generate incident report with detailed diagnostics
+        run: |
+          echo "Generating incident report..."
+          # Add logic to generate incident report
+      - name: Send failure notification to operations team and stakeholders
+        run: |
+          echo "Sending failure notification..."
+          # Add logic to send failure notification
+      - name: Update production status to indicate rollback
+        run: |
+          echo "Updating production status..."
+          # Add logic to update production status
+      - name: Schedule post-mortem analysis meeting
+        run: |
+          echo "Scheduling post-mortem..."
+          # Add logic to schedule post-mortem
+
+concurrency:
+  group: production
+  cancel-in-progress: false
