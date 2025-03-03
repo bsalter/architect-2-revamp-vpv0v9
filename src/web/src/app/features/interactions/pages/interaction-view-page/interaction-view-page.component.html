@@ -1,0 +1,97 @@
+<!-- Loading state -->
+<app-loading-indicator [show]="loading$ | async" [fullscreen]="true"></app-loading-indicator>
+
+<!-- Error state -->
+<div class="error-container" *ngIf="error">
+  <app-error-message [message]="errorMessage"></app-error-message>
+  <button class="btn btn-primary mt-4" (click)="onBackClick()">Back to Interactions</button>
+</div>
+
+<!-- Interaction detail view -->
+<div class="interaction-view-container" *ngIf="interaction && !(loading$ | async)">
+  <!-- Breadcrumb navigation -->
+  <app-breadcrumb></app-breadcrumb>
+  
+  <!-- Interaction header with title and action buttons -->
+  <div class="interaction-header">
+    <h1 class="interaction-title">{{ interaction.title }}</h1>
+    <div class="interaction-actions">
+      <button class="btn btn-outline-secondary" (click)="onBackClick()">← Back</button>
+      <button class="btn btn-primary" *ngIf="canEditInteraction" (click)="onEditClick()">Edit</button>
+      <button class="btn btn-danger" *ngIf="canDeleteInteraction" (click)="onDeleteClick()">Delete</button>
+    </div>
+  </div>
+  
+  <!-- Interaction details card -->
+  <div class="interaction-details card">
+    <div class="card-body">
+      <!-- First row: Type, Lead, Duration, Location -->
+      <div class="row mb-4">
+        <div class="col-md-6 col-lg-3">
+          <div class="detail-label">Type</div>
+          <div class="detail-value">{{ interaction.type }}</div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="detail-label">Lead</div>
+          <div class="detail-value">{{ interaction.lead }}</div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="detail-label">Duration</div>
+          <div class="detail-value">{{ getDurationText(interaction.durationMinutes) }}</div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+          <div class="detail-label">Location</div>
+          <div class="detail-value">{{ interaction.location || 'Not specified' }}</div>
+        </div>
+      </div>
+
+      <!-- Second row: Start and End Date/Time -->
+      <div class="row mb-4">
+        <div class="col-md-6">
+          <div class="detail-label">Start Date & Time</div>
+          <div class="detail-value">{{ formatDateTime(interaction.startDatetime, interaction.timezone) }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="detail-label">End Date & Time</div>
+          <div class="detail-value">{{ formatDateTime(interaction.endDatetime, interaction.timezone) }}</div>
+        </div>
+      </div>
+
+      <!-- Third row: Description -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="detail-label">Description</div>
+          <div class="detail-value description">{{ interaction.description }}</div>
+        </div>
+      </div>
+
+      <!-- Fourth row: Notes (if available) -->
+      <div class="row mb-4" *ngIf="interaction.notes">
+        <div class="col-12">
+          <div class="detail-label">Notes</div>
+          <div class="detail-value notes">{{ interaction.notes }}</div>
+        </div>
+      </div>
+
+      <!-- Fifth row: Metadata -->
+      <div class="row metadata">
+        <div class="col-md-6">
+          <div class="detail-label">Created By</div>
+          <div class="detail-value">{{ interaction.creatorName }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="detail-label">Created On</div>
+          <div class="detail-value">{{ formatDateTime(interaction.createdAt, interaction.timezone) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<app-interaction-delete-modal 
+  *ngIf="interaction"
+  [interaction]="interaction" 
+  (deleted)="onBackClick()" 
+  (cancel)="null">
+</app-interaction-delete-modal>
