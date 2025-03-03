@@ -1,0 +1,173 @@
+// Import design system variables and mixins
+@import '../../../../styles/abstracts/_variables';
+@import '../../../../styles/abstracts/_mixins';
+
+// Main container styles
+.site-selection-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+// Title styling
+.site-selection-title {
+  margin-bottom: $spacing-2;
+  font-size: 1.5rem;
+  font-weight: 600;
+  text-align: center;
+  color: $text-primary;
+}
+
+// Description text styling
+.site-selection-description {
+  margin-bottom: $spacing-4;
+  font-size: 1rem;
+  text-align: center;
+  color: $text-secondary;
+}
+
+// Container for the list of site options
+.site-list-container {
+  width: 100%;
+  margin-bottom: $spacing-4;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid $border;
+  border-radius: $border-radius-md;
+  padding: $spacing-2;
+}
+
+// Radio button group container
+.site-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-2;
+}
+
+// Individual site option styling
+.site-radio-item {
+  display: flex;
+  align-items: center;
+  padding: $spacing-3;
+  border-radius: $border-radius-md;
+  border: 1px solid $border;
+  transition: $transition-base;
+  cursor: pointer;
+  
+  // Hover state
+  &:hover {
+    background-color: rgba($primary, 0.05);
+    border-color: $primary;
+  }
+  
+  // Selected state
+  &.selected {
+    background-color: rgba($primary, 0.1);
+    border-color: $primary;
+  }
+}
+
+// Radio input styling
+.site-radio-input {
+  margin-right: $spacing-3;
+  accent-color: $primary;
+  
+  // Accessible focus state
+  &:focus-visible {
+    @include focus-visible($primary);
+  }
+}
+
+// Site name text styling
+.site-radio-text {
+  font-size: 1rem;
+  color: $text-primary;
+  font-weight: 500;
+}
+
+// Error message styling
+.error-message {
+  color: $danger;
+  font-size: 0.875rem;
+  margin-top: $spacing-2;
+  margin-bottom: $spacing-2;
+  text-align: center;
+}
+
+// Action buttons container
+.actions-container {
+  display: flex;
+  justify-content: space-between;
+  margin-top: $spacing-4;
+  gap: $spacing-3;
+  
+  // Stack buttons vertically on very small screens
+  @include respond-to(xs) {
+    flex-direction: column;
+  }
+  
+  // Side by side buttons on small screens and above
+  @include respond-to(sm) {
+    flex-direction: row;
+  }
+}
+
+// Primary action button styling
+.continue-button {
+  flex: 1;
+  padding: $spacing-3;
+  background-color: $primary;
+  color: white;
+  border: none;
+  border-radius: $border-radius-md;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  // Hover state
+  &:hover:not(:disabled) {
+    background-color: darken($primary, 10%);
+  }
+  
+  // Accessible focus state
+  &:focus-visible {
+    @include focus-visible();
+  }
+  
+  // Disabled state
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Secondary action button styling
+.cancel-button {
+  flex: 1;
+  padding: $spacing-3;
+  background-color: transparent;
+  color: $text-primary;
+  border: 1px solid $border;
+  border-radius: $border-radius-md;
+  font-weight: 500;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  // Hover state
+  &:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: $text-secondary;
+  }
+  
+  // Accessible focus state
+  &:focus-visible {
+    @include focus-visible();
+  }
+  
+  // Disabled state
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
