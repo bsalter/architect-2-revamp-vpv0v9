@@ -1,0 +1,24 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "target": "es2019",                      /* Specify ECMAScript target version for Cypress compatibility */
+    "lib": [
+      "es2019",
+      "dom"
+    ],                                        /* Specify library files to be included in the compilation */
+    "types": [
+      "cypress",                             /* Cypress type definitions - cypress v12.17.3 */
+      "node"                                 /* Node.js type definitions */
+    ],
+    "resolveJsonModule": true,               /* Enable importing JSON files for test fixtures */
+    "esModuleInterop": true,                 /* Enables emit interoperability between CommonJS and ES Modules */
+    "allowJs": true,                         /* Allow JavaScript files to be compiled */
+    "sourceMap": true,                       /* Generates corresponding '.map' file for debugging */
+    "noImplicitAny": false                   /* Disable strict 'any' checking for testing flexibility */
+  },
+  "include": [
+    "**/*.ts",                               /* Include all TypeScript files in the Cypress directory */
+    "../cypress.config.ts",                  /* Include the Cypress configuration file */
+    "../node_modules/cypress/types/**/*.ts"  /* Include Cypress type definitions */
+  ]
+}
