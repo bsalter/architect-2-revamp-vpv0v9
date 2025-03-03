@@ -1,0 +1,310 @@
+# .github/workflows/frontend-cd-staging.yml
+name: Frontend Deployment to Staging
+
+# Trigger the workflow on push and workflow_dispatch events
+on:
+  push:
+    branches:
+      - staging
+    paths:
+      - 'src/web/**'
+      - '.github/workflows/frontend-cd-staging.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_type:
+        description: 'Type of deployment'
+        required: true
+        default: 'standard'
+        type: choice
+        options:
+          - standard
+          - redeploy
+
+# Define global environment variables
+env:
+  NODE_VERSION: 18.x
+  WORKING_DIRECTORY: src/web
+  AWS_REGION: '${{ secrets.AWS_STAGING_REGION }}'
+  ECR_REPOSITORY: '${{ secrets.ECR_STAGING_REPOSITORY }}'
+  ECS_CLUSTER: '${{ secrets.ECS_STAGING_CLUSTER }}'
+  ECS_SERVICE: '${{ secrets.ECS_STAGING_FRONTEND_SERVICE }}'
+  TASK_DEFINITION: '${{ secrets.ECS_STAGING_FRONTEND_TASK_DEFINITION }}'
+  CONTAINER_NAME: frontend
+  STAGING_APP_URL: '${{ secrets.STAGING_APP_URL }}'
+
+# Define concurrency to prevent multiple deployments at the same time
+concurrency:
+  group: staging-frontend
+  cancel-in-progress: true
+
+# Define jobs to be executed in the workflow
+jobs:
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # actions/checkout version: v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3 # actions/setup-node version: v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Run linting
+        run: npm run lint
+      - name: Run unit tests
+        run: npm run test:ci
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2 # docker/setup-buildx-action version: v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1 # aws-actions/amazon-ecr-login version: v1
+      - name: Extract metadata for Docker
+        id: meta
+        uses: docker/metadata-action@v4 # docker/metadata-action version: v4
+        with:
+          images: ${{ steps.login-ecr.outputs.registry }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=sha,format=short
+            staging-latest
+      - name: Prepare staging environment configuration
+        run: cp src/environments/environment.staging.ts src/environments/environment.prod.ts
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4 # docker/build-push-action version: v4
+        with:
+          context: ${{ env.WORKING_DIRECTORY }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: NODE_ENV=production
+      - name: Save image tag for later jobs
+        id: image
+        run: echo "IMAGE_TAG=$(echo ${{ steps.meta.outputs.tags }} | cut -d',' -f1)" >> $GITHUB_OUTPUT
+    outputs:
+      image: ${{ steps.image.outputs.IMAGE_TAG }}
+
+  prepare_deployment:
+    name: Prepare Blue/Green Deployment
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # actions/checkout version: v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Download task definition
+        run: aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} --query taskDefinition > task-definition.json
+      - name: Update container image
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1 # aws-actions/amazon-ecs-render-task-definition version: v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ needs.build_and_push.outputs.image }}
+      - name: Upload task definition
+        uses: actions/upload-artifact@v3 # actions/upload-artifact version: v3
+        with:
+          name: task-definition
+          path: ${{ steps.task-def.outputs.task-definition }}
+      - name: Generate CodeDeploy AppSpec
+        run: echo '{"version":1,"Resources":[{"TargetService":{"Type":"AWS::ECS::Service","Properties":{"TaskDefinition":"<TASK_DEFINITION>","LoadBalancerInfo":{"ContainerName":"${{ env.CONTAINER_NAME }}","ContainerPort":80},"PlatformVersion":"LATEST"},"TerminationTimeoutMinutes":15}}],"Hooks":[{"BeforeAllowTraffic":"${PreTrafficLambdaFunction}","AfterAllowTraffic":"${PostTrafficLambdaFunction}"}]}' > appspec.json
+      - name: Upload AppSpec
+        uses: actions/upload-artifact@v3 # actions/upload-artifact version: v3
+        with:
+          name: appspec
+          path: appspec.json
+    outputs:
+      task-definition-path: ${{ steps.task-def.outputs.task-definition }}
+
+  deploy_to_staging:
+    name: Deploy to Staging Environment
+    needs: prepare_deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: ${{ env.STAGING_APP_URL }}
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Download task definition
+        uses: actions/download-artifact@v3 # actions/download-artifact version: v3
+        with:
+          name: task-definition
+          path: .
+      - name: Download AppSpec
+        uses: actions/download-artifact@v3 # actions/download-artifact version: v3
+        with:
+          name: appspec
+          path: .
+      - name: Deploy to Amazon ECS
+        id: deploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1 # aws-actions/amazon-ecs-deploy-task-definition version: v1
+        with:
+          task-definition: ${{ needs.prepare_deployment.outputs.task-definition-path }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: false
+          codedeploy-appspec: appspec.json
+          codedeploy-application: ${{ secrets.CODEDEPLOY_APPLICATION }}
+          codedeploy-deployment-group: ${{ secrets.CODEDEPLOY_STAGING_DEPLOYMENT_GROUP }}
+      - name: Store deployment ID
+        run: echo "DEPLOYMENT_ID=${{ steps.deploy.outputs.deployment-id }}" >> $GITHUB_ENV
+      - name: Initial health checks
+        run: aws ecs describe-services --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }} --query 'services[0].deployments' --output json
+      - name: Store blue environment URL
+        run: echo "BLUE_ENV_URL=${{ secrets.STAGING_BLUE_URL }}" >> $GITHUB_ENV
+    outputs:
+      deployment-id: ${{ env.DEPLOYMENT_ID }}
+      blue-url: ${{ env.BLUE_ENV_URL }}
+
+  run_tests:
+    name: Run Tests Against Staging
+    needs: deploy_to_staging
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # actions/checkout version: v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3 # actions/setup-node version: v3
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: src/web/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+      - name: Wait for deployment stabilization
+        run: sleep 60
+      - name: Run Cypress tests
+        uses: cypress-io/github-action@v5 # cypress-io/github-action version: v5
+        with:
+          working-directory: ${{ env.WORKING_DIRECTORY }}
+          config: baseUrl=${{ needs.deploy_to_staging.outputs.blue-url }}
+          spec: cypress/e2e/smoke-tests/**/*.cy.ts
+        env:
+          CYPRESS_API_URL: ${{ secrets.STAGING_API_URL }}
+          CYPRESS_USERNAME: ${{ secrets.STAGING_TEST_USERNAME }}
+          CYPRESS_PASSWORD: ${{ secrets.STAGING_TEST_PASSWORD }}
+      - name: Upload test artifacts
+        uses: actions/upload-artifact@v3 # actions/upload-artifact version: v3
+        if: always()
+        with:
+          name: test-artifacts
+          path: src/web/cypress/screenshots, src/web/cypress/videos
+          if-no-files-found: ignore
+
+  traffic_shift:
+    name: Shift Traffic to New Deployment
+    needs: [deploy_to_staging, run_tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Start traffic shift - 10%
+        run: aws deploy update-deployment --deployment-id ${{ needs.deploy_to_staging.outputs.deployment-id }} --target-deployment-config DEPLOYMENT_CONFIG_NAME:CodeDeployDefault.ECSLinear10PercentEvery1Minutes
+      - name: Monitor health metrics - 10%
+        run: sleep 60 && aws cloudwatch get-metric-statistics --namespace AWS/ECS --metric-name CPUUtilization --dimensions Name=ClusterName,Value=${{ env.ECS_CLUSTER }} Name=ServiceName,Value=${{ env.ECS_SERVICE }} --start-time $(date -u +"%Y-%m-%dT%H:%M:%SZ" -d "-5 minutes") --end-time $(date -u +"%Y-%m-%dT%H:%M:%SZ") --period 60 --statistics Average
+      - name: Complete traffic shift - 100%
+        run: aws deploy update-deployment --deployment-id ${{ needs.deploy_to_staging.outputs.deployment-id }} --target-deployment-config DEPLOYMENT_CONFIG_NAME:CodeDeployDefault.ECSAllAtOnce
+      - name: Wait for deployment completion
+        run: aws deploy wait deployment-successful --deployment-id ${{ needs.deploy_to_staging.outputs.deployment-id }}
+      - name: Verify staging traffic
+        run: curl --retry 5 --retry-delay 10 --retry-connrefused ${{ env.STAGING_APP_URL }}
+
+  notify_completion:
+    name: Notify Deployment Completion
+    needs: traffic_shift
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # actions/checkout version: v3
+      - name: Create deployment report
+        run: echo "Staging deployment completed at $(date)" > deployment-report.txt
+      - name: Upload deployment report
+        uses: actions/upload-artifact@v3 # actions/upload-artifact version: v3
+        with:
+          name: deployment-report
+          path: deployment-report.txt
+      - name: Notify team
+        uses: actions/github-script@v6 # actions/github-script version: v6
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `✅ Frontend deployment to staging environment completed successfully. The application is now available at ${process.env.STAGING_URL}`
+            });
+        env:
+          STAGING_URL: ${{ env.STAGING_APP_URL }}
+
+  rollback_on_failure:
+    name: Rollback on Failure
+    runs-on: ubuntu-latest
+    needs: [build_and_push, prepare_deployment, deploy_to_staging, run_tests, traffic_shift]
+    if: failure()
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version: v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_STAGING_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_STAGING_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Get previous task definition
+        run: aws ecs describe-task-definition --task-definition ${{ env.TASK_DEFINITION }} --query 'taskDefinition.taskDefinitionArn' --output text > previous-task-def.txt
+      - name: Check if deployment was created
+        id: check-deployment
+        run: |
+          if [[ -n "${{ needs.deploy_to_staging.outputs.deployment-id || '' }}" ]]; then
+            echo "has_deployment=true" >> $GITHUB_OUTPUT
+          else
+            echo "has_deployment=false" >> $GITHUB_OUTPUT
+          fi
+      - name: Abort CodeDeploy deployment
+        if: "steps.check-deployment.outputs.has_deployment == 'true'"
+        run: aws deploy stop-deployment --deployment-id ${{ needs.deploy_to_staging.outputs.deployment-id }} --auto-rollback
+      - name: Rollback deployment
+        if: "steps.check-deployment.outputs.has_deployment != 'true'"
+        run: aws ecs update-service --cluster ${{ env.ECS_CLUSTER }} --service ${{ env.ECS_SERVICE }} --task-definition $(cat previous-task-def.txt) --force-new-deployment
+      - name: Wait for rollback to complete
+        run: aws ecs wait services-stable --cluster ${{ env.ECS_CLUSTER }} --services ${{ env.ECS_SERVICE }}
+      - name: Verify rollback
+        run: curl --fail --retry 5 --retry-connrefused --retry-delay 10 ${{ env.STAGING_APP_URL }}
+      - name: Notify rollback
+        uses: actions/github-script@v6 # actions/github-script version: v6
+        with:
+          script: |
+            github.rest.repos.createCommitComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: context.sha,
+              body: `⚠️ Staging deployment failed and was rolled back automatically. Please check the workflow logs for details.`
+            });
