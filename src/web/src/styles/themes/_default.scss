@@ -1,0 +1,67 @@
+// Default Theme (Light Theme)
+// This file defines the color palette and styling variables for the application's default light theme
+
+// Main Color Palette
+$color-primary: #3B82F6;          // Main brand color, primary buttons, active elements
+$color-secondary: #6B7280;        // Secondary buttons, non-essential UI elements
+$color-success: #10B981;          // Success messages, positive feedback
+$color-warning: #F59E0B;          // Warning messages, alerts requiring attention
+$color-danger: #EF4444;           // Error messages, destructive actions
+$color-background: #F9FAFB;       // Page background, content areas
+$color-surface: #FFFFFF;          // Cards, dialogs, elevated components
+$color-text-primary: #111827;     // Primary text content
+$color-text-secondary: #6B7280;   // Secondary text, labels, placeholders
+$color-border: #E5E7EB;           // Element borders, dividers, separators
+
+// UI Element Colors
+$color-input-background: #FFFFFF;
+$color-input-border: #D1D5DB;
+$color-input-text: #111827;
+$color-input-placeholder: #9CA3AF;
+$color-input-focus-border: #3B82F6;
+$color-disabled-background: #F3F4F6;
+$color-disabled-text: #9CA3AF;
+$color-link: #3B82F6;
+$color-link-hover: #2563EB;
+$color-shadow: rgba(0, 0, 0, 0.1);
+$color-overlay: rgba(0, 0, 0, 0.5);
+
+// Shadows
+$shadow-sm: 0 1px 2px 0 $color-shadow;
+$shadow-md: 0 4px 6px -1px $color-shadow;
+$shadow-lg: 0 10px 15px -3px $color-shadow;
+$shadow-xl: 0 20px 25px -5px $color-shadow;
+
+// Typography
+$font-family-base: 'Inter', sans-serif;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Border Radius
+$border-radius-sm: 0.125rem;
+$border-radius-md: 0.25rem;
+$border-radius-lg: 0.5rem;
+$border-radius-xl: 0.75rem;
+$border-radius-pill: 9999px;
+
+// Spacing
+$spacing-1: 0.25rem;
+$spacing-2: 0.5rem;
+$spacing-3: 0.75rem;
+$spacing-4: 1rem;
+$spacing-5: 1.25rem;
+$spacing-6: 1.5rem;
+
+// Transitions
+$transition-base: all 0.2s ease-in-out;
+
+// Z-index
+$z-index-dropdown: 1000;
+$z-index-sticky: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
