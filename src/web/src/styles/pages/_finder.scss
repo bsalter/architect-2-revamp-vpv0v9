@@ -1,0 +1,652 @@
+// Import abstracts with design tokens and utility mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// Custom mixins for the Finder component
+// =============================================================================
+
+/// Applies card styling for mobile view
+/// @param {String} $padding - Padding value for the card
+@mixin finder-card-style($padding) {
+  padding: $padding;
+  border: 1px solid $border;
+  border-radius: $border-radius-lg;
+  background-color: $surface;
+  @include elevation(2);
+  margin-bottom: $spacing-4;
+  transition: $transition-base;
+  
+  &:hover {
+    @include elevation(3);
+  }
+}
+
+/// Applies consistent shadow styling to table container
+/// @param {Number} $depth - Shadow depth level (1-5)
+@mixin finder-table-shadow($depth) {
+  @include elevation($depth);
+  border: 1px solid $border;
+  border-radius: $border-radius-lg;
+  overflow: hidden;
+}
+
+// =============================================================================
+// Animations
+// =============================================================================
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+// =============================================================================
+// Main container styles
+// =============================================================================
+
+.interaction-finder-page {
+  padding: $spacing-6;
+  background-color: $background;
+  min-height: calc(100vh - 64px); // Adjust based on header height
+}
+
+// =============================================================================
+// Header section
+// =============================================================================
+
+.finder-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-6;
+  
+  h1 {
+    font-size: $font-size-2xl;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin: 0;
+  }
+  
+  .actions {
+    display: flex;
+    gap: $spacing-3;
+    
+    .new-interaction-btn {
+      @include button-style('primary');
+      @include flex(row, center, center);
+      
+      .icon {
+        margin-right: $spacing-2;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// Search container
+// =============================================================================
+
+.finder-search-container {
+  display: flex;
+  gap: $spacing-3;
+  margin-bottom: $spacing-5;
+  
+  .search-input {
+    flex: 1;
+    position: relative;
+    
+    input {
+      @include input-style('text');
+      padding-left: $spacing-8;
+      width: 100%;
+      
+      &:focus {
+        border-color: $primary;
+        box-shadow: 0 0 0 3px rgba($primary, 0.1);
+      }
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: $spacing-3;
+      top: 50%;
+      transform: translateY(-50%);
+      color: $text-secondary;
+    }
+  }
+  
+  .filter-toggle {
+    @include button-style('secondary', true);
+    @include flex(row, center, center);
+    
+    .filter-icon {
+      margin-right: $spacing-2;
+    }
+    
+    .filter-count {
+      background-color: $primary;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      @include flex(row, center, center);
+      font-size: $font-size-xs;
+      margin-left: $spacing-2;
+    }
+  }
+}
+
+// =============================================================================
+// Filters panel
+// =============================================================================
+
+.finder-filters-panel {
+  @include finder-card-style($spacing-4);
+  margin-bottom: $spacing-5;
+  animation: fadeIn 0.3s ease-in-out;
+  
+  .filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-4;
+    
+    h3 {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-semibold;
+      margin: 0;
+    }
+    
+    .close-btn {
+      background: none;
+      border: none;
+      color: $text-secondary;
+      cursor: pointer;
+      font-size: $font-size-xl;
+      padding: $spacing-1;
+      
+      &:hover {
+        color: $text-primary;
+      }
+    }
+  }
+  
+  .filters-divider {
+    height: 1px;
+    background-color: $border;
+    margin: $spacing-4 0;
+  }
+  
+  .filter-groups {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: $spacing-4;
+    
+    .filter-group {
+      margin-bottom: $spacing-4;
+      
+      .group-label {
+        font-weight: $font-weight-medium;
+        margin-bottom: $spacing-2;
+        color: $text-primary;
+      }
+      
+      .checkbox-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: $spacing-2 $spacing-4;
+        
+        .checkbox-item {
+          display: flex;
+          align-items: center;
+          
+          input[type="checkbox"] {
+            @include input-style('checkbox');
+          }
+          
+          label {
+            margin-left: $spacing-2;
+            font-size: $font-size-sm;
+          }
+        }
+      }
+      
+      .date-range {
+        display: flex;
+        gap: $spacing-3;
+        
+        .date-input {
+          flex: 1;
+          
+          label {
+            display: block;
+            font-size: $font-size-sm;
+            margin-bottom: $spacing-1;
+          }
+          
+          input {
+            @include input-style('text');
+            width: 100%;
+          }
+        }
+      }
+      
+      .select-input {
+        select {
+          @include input-style('select');
+          width: 100%;
+        }
+      }
+    }
+  }
+  
+  .filters-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-3;
+    margin-top: $spacing-4;
+    
+    .clear-btn {
+      @include button-style('secondary', true);
+    }
+    
+    .apply-btn {
+      @include button-style('primary');
+    }
+  }
+}
+
+// =============================================================================
+// Table container
+// =============================================================================
+
+.finder-table-container {
+  @include finder-table-shadow(2);
+  margin-bottom: $spacing-5;
+  background-color: $surface;
+  height: calc(100vh - 300px); // Adjust based on other elements
+  min-height: 400px;
+}
+
+// =============================================================================
+// AG Grid customization
+// =============================================================================
+
+.ag-theme-alpine-custom {
+  // AG Grid CSS Variables customization
+  --ag-font-family: #{$font-family-base};
+  --ag-font-size: #{$font-size-sm};
+  --ag-header-foreground-color: #{$text-primary};
+  --ag-header-background-color: #{$background};
+  --ag-header-cell-hover-background-color: rgba(0, 0, 0, 0.03);
+  --ag-row-border-color: #{$border};
+  --ag-row-hover-color: rgba($primary, 0.05);
+  --ag-selected-row-background-color: rgba($primary, 0.1);
+  --ag-odd-row-background-color: #{$surface};
+  --ag-header-column-separator-color: #{$border};
+  --ag-header-column-separator-height: 50%;
+  --ag-header-column-resize-handle-color: #{$border};
+  --ag-grid-size: 4px;
+  --ag-list-item-height: 30px;
+  
+  // Header customization
+  .ag-header {
+    border-bottom: 1px solid $border;
+    
+    .ag-header-cell {
+      padding: $spacing-3 $spacing-4;
+      
+      .ag-header-cell-text {
+        font-weight: $font-weight-semibold;
+      }
+      
+      .ag-header-cell-sorted-asc,
+      .ag-header-cell-sorted-desc {
+        color: $primary;
+      }
+    }
+  }
+  
+  // Row customization
+  .ag-row {
+    border-bottom: 1px solid $border;
+    
+    .ag-cell {
+      padding: $spacing-3 $spacing-4;
+      line-height: $line-height-normal;
+      
+      &.cell-title {
+        font-weight: $font-weight-medium;
+      }
+      
+      &.cell-type {
+        text-transform: capitalize;
+        
+        .type-badge {
+          display: inline-flex;
+          align-items: center;
+          padding: $spacing-1 $spacing-2;
+          border-radius: $border-radius-full;
+          font-size: $font-size-xs;
+          font-weight: $font-weight-medium;
+          
+          &.meeting {
+            background-color: rgba($primary, 0.1);
+            color: $primary;
+          }
+          
+          &.call {
+            background-color: rgba($success, 0.1);
+            color: $success;
+          }
+          
+          &.email {
+            background-color: rgba($warning, 0.1);
+            color: $warning;
+          }
+          
+          &.other {
+            background-color: rgba($secondary, 0.1);
+            color: $secondary;
+          }
+        }
+      }
+      
+      &.cell-date {
+        white-space: nowrap;
+      }
+      
+      &.cell-actions {
+        display: flex;
+        gap: $spacing-2;
+        justify-content: flex-end;
+        
+        button {
+          background: none;
+          border: none;
+          color: $text-secondary;
+          cursor: pointer;
+          padding: $spacing-1;
+          border-radius: $border-radius-full;
+          
+          &:hover {
+            background-color: $hover-overlay;
+            color: $text-primary;
+          }
+        }
+      }
+    }
+    
+    &.ag-row-selected {
+      .ag-cell {
+        background-color: var(--ag-selected-row-background-color);
+      }
+    }
+  }
+  
+  // No rows overlay
+  .ag-overlay-no-rows-center {
+    padding: $spacing-6;
+    
+    .ag-overlay-no-rows-wrapper {
+      background-color: $surface;
+    }
+  }
+}
+
+// =============================================================================
+// Empty state
+// =============================================================================
+
+.finder-empty-state {
+  @include flex(column, center, center);
+  padding: $spacing-8;
+  text-align: center;
+  
+  .empty-icon {
+    font-size: 48px;
+    color: $text-secondary;
+    margin-bottom: $spacing-4;
+  }
+  
+  h3 {
+    font-size: $font-size-xl;
+    color: $text-primary;
+    margin-bottom: $spacing-2;
+  }
+  
+  p {
+    color: $text-secondary;
+    max-width: 400px;
+    margin-bottom: $spacing-4;
+  }
+  
+  .create-btn {
+    @include button-style('primary');
+  }
+}
+
+// =============================================================================
+// Pagination
+// =============================================================================
+
+.finder-pagination {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-4 0;
+  
+  .pagination-info {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: $spacing-1;
+    
+    .page-item {
+      @include flex(row, center, center);
+      width: 32px;
+      height: 32px;
+      border-radius: $border-radius-md;
+      font-size: $font-size-sm;
+      cursor: pointer;
+      transition: $transition-base;
+      
+      &:hover {
+        background-color: $hover-overlay;
+      }
+      
+      &.active {
+        background-color: $primary;
+        color: white;
+        
+        &:hover {
+          background-color: $primary-dark;
+        }
+      }
+      
+      &.disabled {
+        opacity: $disabled-opacity;
+        pointer-events: none;
+      }
+    }
+  }
+}
+
+// =============================================================================
+// Mobile card view
+// =============================================================================
+
+.finder-mobile-card {
+  @include finder-card-style($spacing-3);
+  display: none;
+  
+  .card-header {
+    margin-bottom: $spacing-2;
+    
+    .card-title {
+      font-size: $font-size-md;
+      font-weight: $font-weight-semibold;
+      color: $text-primary;
+      margin-bottom: $spacing-1;
+    }
+    
+    .card-type {
+      display: inline-flex;
+      align-items: center;
+      padding: $spacing-1 $spacing-2;
+      border-radius: $border-radius-full;
+      font-size: $font-size-xs;
+      font-weight: $font-weight-medium;
+      
+      &.meeting {
+        background-color: rgba($primary, 0.1);
+        color: $primary;
+      }
+      
+      &.call {
+        background-color: rgba($success, 0.1);
+        color: $success;
+      }
+      
+      &.email {
+        background-color: rgba($warning, 0.1);
+        color: $warning;
+      }
+      
+      &.other {
+        background-color: rgba($secondary, 0.1);
+        color: $secondary;
+      }
+    }
+  }
+  
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-2;
+    
+    .card-info-row {
+      display: flex;
+      align-items: center;
+      font-size: $font-size-sm;
+      
+      .info-label {
+        min-width: 80px;
+        color: $text-secondary;
+      }
+      
+      .info-value {
+        font-weight: $font-weight-medium;
+        color: $text-primary;
+      }
+    }
+  }
+  
+  .card-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: $spacing-3;
+    gap: $spacing-2;
+    
+    button {
+      padding: $spacing-1 $spacing-2;
+      font-size: $font-size-sm;
+      border-radius: $border-radius-md;
+      
+      &.view-btn {
+        @include button-style('primary', true);
+      }
+      
+      &.edit-btn {
+        @include button-style('secondary', true);
+      }
+      
+      &.delete-btn {
+        @include button-style('danger', true);
+      }
+    }
+  }
+}
+
+// =============================================================================
+// Responsive styles
+// =============================================================================
+
+@media (max-width: map-get($breakpoints, sm)) {
+  .interaction-finder-page {
+    padding: $spacing-3;
+  }
+  
+  .finder-header {
+    margin-bottom: $spacing-4;
+    
+    h1 {
+      font-size: $font-size-xl;
+    }
+    
+    .actions {
+      .new-interaction-btn {
+        span {
+          display: none;
+        }
+        
+        .icon {
+          margin-right: 0;
+        }
+      }
+    }
+  }
+  
+  .finder-search-container {
+    flex-direction: column;
+    gap: $spacing-2;
+    margin-bottom: $spacing-4;
+    
+    .search-input {
+      input {
+        height: 44px;
+      }
+    }
+  }
+  
+  .finder-table-container {
+    display: none;
+  }
+  
+  .finder-mobile-card {
+    display: block;
+  }
+  
+  .finder-pagination {
+    flex-direction: column;
+    gap: $spacing-3;
+    
+    .pagination-info {
+      order: 2;
+    }
+    
+    .pagination-controls {
+      order: 1;
+    }
+  }
+}
+
+@media (min-width: map-get($breakpoints, md)) and (max-width: map-get($breakpoints, lg)) {
+  .ag-theme-alpine-custom {
+    // Hide less important columns on tablet
+    .ag-header-cell.column-location,
+    .ag-cell.cell-location {
+      display: none;
+    }
+  }
+  
+  .finder-filters-panel {
+    .filter-groups {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
