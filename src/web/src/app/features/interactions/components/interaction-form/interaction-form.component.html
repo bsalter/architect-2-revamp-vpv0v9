@@ -1,0 +1,101 @@
+<form class="interaction-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="form-container">
+    <div class="form-header">
+      <h2>{{ isEditMode ? 'Edit Interaction' : 'Create New Interaction' }}</h2>
+    </div>
+
+    <div class="loading-overlay" *ngIf="loading$ | async">
+      <app-loading-indicator></app-loading-indicator>
+    </div>
+
+    <div class="form-group">
+      <label for="title" class="form-label required">Title</label>
+      <input type="text" id="title" class="form-control" formControlName="title" placeholder="Enter interaction title"
+        [class.is-invalid]="hasError('title', 'required') || hasError('title', 'minlength') || hasError('title', 'maxlength')">
+      <app-error-message *ngIf="hasError('title', 'required')" message="Title is required"></app-error-message>
+      <app-error-message *ngIf="hasError('title', 'minlength')" message="Title must be at least 5 characters"></app-error-message>
+      <app-error-message *ngIf="hasError('title', 'maxlength')" message="Title cannot exceed 100 characters"></app-error-message>
+    </div>
+
+    <div class="form-group">
+      <label for="type" class="form-label required">Type</label>
+      <select id="type" class="form-control" formControlName="type" [class.is-invalid]="hasError('type', 'required')">
+        <option value="" disabled>Select interaction type</option>
+        <option *ngFor="let type of interactionTypes" [value]="type">{{ type }}</option>
+      </select>
+      <app-error-message *ngIf="hasError('type', 'required')" message="Interaction type is required"></app-error-message>
+    </div>
+
+    <div class="form-group">
+      <label for="lead" class="form-label required">Lead</label>
+      <input type="text" id="lead" class="form-control" formControlName="lead" placeholder="Enter lead name"
+        [class.is-invalid]="hasError('lead', 'required')">
+      <app-error-message *ngIf="hasError('lead', 'required')" message="Lead is required"></app-error-message>
+    </div>
+
+    <div class="date-time-section">
+      <div class="form-group">
+        <label for="startDatetime" class="form-label required">Start Date & Time</label>
+        <app-date-time-picker id="startDatetime" formControlName="startDatetime"
+          [class.is-invalid]="hasError('startDatetime', 'required')"
+          [timezone]="form.get('timezone')?.value"
+          [showTimezone]="false">
+        </app-date-time-picker>
+        <app-error-message *ngIf="hasError('startDatetime', 'required')" message="Start date and time is required"></app-error-message>
+      </div>
+
+      <div class="form-group">
+        <label for="endDatetime" class="form-label required">End Date & Time</label>
+        <app-date-time-picker id="endDatetime" formControlName="endDatetime"
+          [class.is-invalid]="hasError('endDatetime', 'required') || hasError('endDatetime', 'dateAfter')"
+          [timezone]="form.get('timezone')?.value"
+          [showTimezone]="false"
+          [minDate]="form.get('startDatetime')?.value">
+        </app-date-time-picker>
+        <app-error-message *ngIf="hasError('endDatetime', 'required')" message="End date and time is required"></app-error-message>
+        <app-error-message *ngIf="hasError('endDatetime', 'dateAfter')" message="End date must be after start date"></app-error-message>
+      </div>
+
+      <div class="form-group">
+        <label for="timezone" class="form-label required">Timezone</label>
+        <select id="timezone" class="form-control" formControlName="timezone" [class.is-invalid]="hasError('timezone', 'required')">
+          <option value="" disabled>Select timezone</option>
+          <option *ngFor="let tz of timezones" [value]="tz">{{ tz }}</option>
+        </select>
+        <app-error-message *ngIf="hasError('timezone', 'required')" message="Timezone is required"></app-error-message>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="location" class="form-label">Location</label>
+      <input type="text" id="location" class="form-control" formControlName="location" placeholder="Enter location (optional)">
+    </div>
+
+    <div class="form-group">
+      <label for="description" class="form-label required">Description</label>
+      <textarea id="description" class="form-control" formControlName="description" rows="4" placeholder="Enter interaction description"
+        [class.is-invalid]="hasError('description', 'required') || hasError('description', 'minlength')"></textarea>
+      <app-error-message *ngIf="hasError('description', 'required')" message="Description is required"></app-error-message>
+      <app-error-message *ngIf="hasError('description', 'minlength')" message="Description must be at least 10 characters"></app-error-message>
+    </div>
+
+    <div class="form-group">
+      <label for="notes" class="form-label">Notes</label>
+      <textarea id="notes" class="form-control" formControlName="notes" rows="3" placeholder="Enter additional notes (optional)"></textarea>
+    </div>
+
+    <div class="form-footer">
+      <div class="required-note">* Required fields</div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="!form.valid || (submitting$ | async)">
+          <span *ngIf="!(submitting$ | async)">{{ isEditMode ? 'Save Changes' : 'Create' }}</span>
+          <span *ngIf="submitting$ | async">
+            <app-loading-indicator size="small"></app-loading-indicator>
+            Saving...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
