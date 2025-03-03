@@ -1,0 +1,67 @@
+<nav class="pagination-container" aria-label="Pagination">
+  <ul class="pagination">
+    <li class="page-item first-page" [class.disabled]="currentPage === 1">
+      <button 
+        class="page-link" 
+        aria-label="Go to first page" 
+        (click)="goToPage(1)" 
+        [disabled]="currentPage === 1"
+        type="button">
+        <fa-icon [icon]="faAngleDoubleLeft" aria-hidden="true"></fa-icon>
+      </button>
+    </li>
+    <li class="page-item prev-page" [class.disabled]="currentPage === 1">
+      <button 
+        class="page-link" 
+        aria-label="Go to previous page" 
+        (click)="goToPage(currentPage - 1)" 
+        [disabled]="currentPage === 1"
+        type="button">
+        <fa-icon [icon]="faAngleLeft" aria-hidden="true"></fa-icon>
+      </button>
+    </li>
+    
+    <li class="page-item start-ellipsis" *ngIf="showStartEllipsis">
+      <span class="page-link">...</span>
+    </li>
+    
+    <li class="page-item" *ngFor="let page of visiblePages" [class.active]="page === currentPage">
+      <button 
+        class="page-link" 
+        aria-label="Go to page {{page}}" 
+        [attr.aria-current]="page === currentPage ? 'page' : null"
+        (click)="goToPage(page)"
+        type="button">
+        {{page}}
+      </button>
+    </li>
+    
+    <li class="page-item end-ellipsis" *ngIf="showEndEllipsis">
+      <span class="page-link">...</span>
+    </li>
+    
+    <li class="page-item next-page" [class.disabled]="currentPage === totalPages">
+      <button 
+        class="page-link" 
+        aria-label="Go to next page" 
+        (click)="goToPage(currentPage + 1)" 
+        [disabled]="currentPage === totalPages"
+        type="button">
+        <fa-icon [icon]="faAngleRight" aria-hidden="true"></fa-icon>
+      </button>
+    </li>
+    <li class="page-item last-page" [class.disabled]="currentPage === totalPages">
+      <button 
+        class="page-link" 
+        aria-label="Go to last page" 
+        (click)="goToPage(totalPages)" 
+        [disabled]="currentPage === totalPages"
+        type="button">
+        <fa-icon [icon]="faAngleDoubleRight" aria-hidden="true"></fa-icon>
+      </button>
+    </li>
+  </ul>
+  <div class="pagination-info" *ngIf="totalPages > 1">
+    Page {{currentPage}} of {{totalPages}}
+  </div>
+</nav>
