@@ -1,0 +1,219 @@
+@import "../../../../styles/abstracts/_variables";
+@import "../../../../styles/abstracts/_mixins";
+
+.interaction-view-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-4;
+  background-color: $background;
+
+  @include respond-to(xs) {
+    padding: $spacing-3;
+  }
+}
+
+.interaction-header {
+  @include flex(row, space-between, center, wrap);
+  margin-bottom: $spacing-6;
+  gap: $spacing-4;
+
+  @include respond-to(xs) {
+    @include flex(column, flex-start, stretch);
+    margin-bottom: $spacing-4;
+  }
+}
+
+.interaction-title {
+  font-size: $font-size-xl;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.interaction-actions {
+  @include flex(row, flex-end, center);
+  gap: $spacing-3;
+  flex-wrap: wrap;
+
+  @include respond-to(xs) {
+    justify-content: center;
+    margin-top: $spacing-3;
+    width: 100%;
+
+    button {
+      min-height: 44px; // Improved touch target size
+    }
+  }
+}
+
+.interaction-details {
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  border: 1px solid $border;
+  margin-bottom: $spacing-6;
+
+  .card-body {
+    padding: $spacing-6;
+
+    @include respond-to(xs) {
+      padding: $spacing-4;
+    }
+  }
+
+  .section-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin-top: 0;
+    margin-bottom: $spacing-4;
+    border-bottom: 1px solid $border;
+    padding-bottom: $spacing-2;
+  }
+}
+
+.detail-label {
+  font-size: 0.875rem; // Using actual value since $font-size-sm wasn't available in imports
+  font-weight: $font-weight-semibold;
+  color: $text-secondary;
+  margin-bottom: $spacing-2;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-value {
+  font-size: 1rem; // Using actual value since $font-size-md wasn't available in imports
+  color: $text-primary;
+  margin-bottom: $spacing-4;
+  word-break: break-word;
+
+  &.empty {
+    color: $text-secondary;
+    font-style: italic;
+  }
+
+  &.description,
+  &.notes {
+    line-height: 1.5;
+    white-space: pre-line;
+
+    p {
+      margin-top: 0;
+      margin-bottom: $spacing-3;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.row {
+  @include flex(row, flex-start, stretch, wrap);
+  margin: 0 -$spacing-3;
+  margin-bottom: $spacing-4;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  &.metadata {
+    margin-top: $spacing-6;
+    padding-top: $spacing-4;
+    border-top: 1px solid $border;
+    color: $text-secondary;
+    font-size: 0.875rem;
+  }
+}
+
+.col-12,
+.col-md-6,
+.col-lg-3 {
+  padding: 0 $spacing-3;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: $spacing-4;
+}
+
+@include respond-to(md) {
+  .col-md-6 {
+    width: 50%;
+  }
+}
+
+@include respond-to(lg) {
+  .col-lg-3 {
+    width: 25%;
+  }
+}
+
+.error-container {
+  @include flex(column, center, center);
+  min-height: 300px;
+  text-align: center;
+  padding: $spacing-6;
+
+  .error-icon {
+    font-size: $spacing-8;
+    color: $text-secondary;
+    margin-bottom: $spacing-4;
+  }
+
+  .error-title {
+    font-size: $font-size-lg;
+    font-weight: $font-weight-semibold;
+    color: $text-primary;
+    margin-bottom: $spacing-3;
+  }
+
+  .error-message {
+    color: $text-secondary;
+    max-width: 600px;
+    margin-bottom: $spacing-4;
+  }
+
+  .error-action {
+    margin-top: $spacing-2;
+  }
+}
+
+// Accessibility enhancements
+a, button {
+  &:focus-visible {
+    @include focus-visible;
+  }
+}
+
+// Print styles for better printed output
+@media print {
+  .interaction-view-container {
+    padding: 0;
+    background-color: white;
+  }
+
+  .interaction-header {
+    margin-bottom: $spacing-4;
+  }
+
+  .interaction-actions {
+    display: none;
+  }
+
+  .interaction-details {
+    box-shadow: none;
+    border: none;
+    margin-bottom: $spacing-4;
+
+    .card-body {
+      padding: 0;
+    }
+  }
+
+  .col-12, .col-md-6, .col-lg-3 {
+    width: 100%;
+    padding: 0;
+  }
+}
