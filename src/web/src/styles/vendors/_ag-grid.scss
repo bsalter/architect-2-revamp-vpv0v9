@@ -1,0 +1,300 @@
+// Import internal style dependencies
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// Import AG Grid base styles
+@import '~ag-grid-community/dist/styles/ag-grid.css';
+@import '~ag-grid-community/dist/styles/ag-theme-alpine.css';
+
+// Define AG Grid Alpine theme variables
+$ag-alpine-active-color: $primary;
+$ag-alpine-background-color: $background;
+$ag-alpine-header-background-color: $surface;
+$ag-alpine-border-color: $border;
+$ag-alpine-selected-row-background: rgba($primary, 0.1);
+$ag-alpine-row-hover-color: rgba($primary, 0.05);
+
+// AG Grid Alpine theme customization
+.ag-theme-alpine {
+  // Override Alpine theme CSS variables with application colors
+  --ag-background-color: #{$background};
+  --ag-header-background-color: #{$surface};
+  --ag-odd-row-background-color: #{rgba($background, 0.5)};
+  --ag-header-foreground-color: #{$text-primary};
+  --ag-foreground-color: #{$text-primary};
+  --ag-secondary-foreground-color: #{$text-secondary};
+  --ag-border-color: #{$border};
+  --ag-row-border-color: #{rgba($border, 0.1)};
+  --ag-row-hover-color: #{rgba($primary, 0.05)};
+  --ag-selected-row-background-color: #{rgba($primary, 0.1)};
+  --ag-font-family: 'Inter', sans-serif;
+  --ag-font-size: 14px;
+  --ag-border-radius: #{$border-radius-md};
+  
+  // Additional custom styles
+  border-radius: var(--ag-border-radius);
+  box-shadow: #{$shadow-sm};
+  border: 1px solid var(--ag-border-color);
+  
+  // Header styling
+  .ag-header {
+    font-weight: #{$font-weight-semibold};
+    border-bottom: 1px solid var(--ag-border-color);
+  }
+  
+  .ag-header-cell {
+    padding: $spacing-3 $spacing-4;
+    transition: background-color 0.2s ease;
+  }
+  
+  .ag-header-cell-resize {
+    width: 2px;
+    background-color: var(--ag-border-color);
+  }
+  
+  .ag-header-cell-menu-button {
+    color: $primary;
+  }
+  
+  .ag-sort-indicator-icon {
+    color: $primary;
+  }
+  
+  // Row styling
+  .ag-row {
+    transition: background-color 0.2s ease;
+    min-height: 48px !important;
+    cursor: pointer;
+  }
+  
+  .ag-row-selected {
+    position: relative;
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background-color: $primary;
+    }
+  }
+  
+  // Cell styling
+  .ag-cell {
+    padding: $spacing-3 $spacing-4;
+    line-height: $line-height-normal;
+    outline: none !important;
+  }
+  
+  .ag-cell-focus {
+    border: none !important;
+    outline: none !important;
+  }
+  
+  // Pagination styling
+  .ag-paging-panel {
+    padding: $spacing-3 $spacing-4;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--ag-border-color);
+  }
+  
+  .ag-paging-button {
+    cursor: pointer;
+    padding: $spacing-1 $spacing-2;
+    margin: 0 $spacing-1;
+    border-radius: $border-radius-md;
+    border: 1px solid $border;
+    background-color: transparent;
+    transition: $transition-base;
+    &:hover:not(.ag-disabled) {
+      background-color: rgba($primary, 0.1);
+      border-color: $primary;
+      color: $primary;
+    }
+  }
+  
+  .ag-paging-button-active {
+    background-color: $primary;
+    border-color: $primary;
+    color: white;
+  }
+}
+
+// Custom cell renderers
+.ag-cell-date {
+  font-family: 'Roboto Mono', monospace;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.ag-cell-type {
+  display: inline-block;
+  padding: $spacing-1 $spacing-2;
+  border-radius: $border-radius-md;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  text-transform: uppercase;
+  line-height: $line-height-none;
+}
+
+.ag-cell-type-meeting {
+  background-color: rgba($primary, 0.1);
+  color: $primary;
+}
+
+.ag-cell-type-call {
+  background-color: rgba($success, 0.1);
+  color: $success;
+}
+
+.ag-cell-type-email {
+  background-color: rgba($warning, 0.1);
+  color: $warning;
+}
+
+.ag-cell-actions {
+  display: flex;
+  gap: $spacing-2;
+  justify-content: flex-end;
+  
+  button {
+    padding: $spacing-1;
+    border-radius: $border-radius-md;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    transition: $transition-base;
+  }
+  
+  .edit-button {
+    color: $primary;
+    &:hover {
+      background-color: rgba($primary, 0.1);
+    }
+  }
+  
+  .delete-button {
+    color: $danger;
+    &:hover {
+      background-color: rgba($danger, 0.1);
+    }
+  }
+}
+
+// Custom filter panel styling
+.ag-filter-toolpanel {
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+}
+
+.ag-filter-toolpanel-header {
+  font-weight: $font-weight-semibold;
+  padding: $spacing-3;
+  border-bottom: 1px solid $border;
+}
+
+.ag-filter-toolpanel-body {
+  padding: $spacing-3;
+}
+
+.ag-filter-apply-panel {
+  display: flex;
+  justify-content: flex-end;
+  padding: $spacing-3;
+  border-top: 1px solid $border;
+  gap: $spacing-2;
+}
+
+.ag-filter-button {
+  padding: $spacing-2 $spacing-3;
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+  font-size: $font-size-sm;
+  transition: $transition-base;
+}
+
+.ag-filter-apply-button {
+  background-color: $primary;
+  color: white;
+  border: none;
+  &:hover {
+    background-color: $primary-dark;
+  }
+}
+
+.ag-filter-cancel-button {
+  background-color: transparent;
+  color: $text-secondary;
+  border: 1px solid $border;
+  &:hover {
+    background-color: rgba($border, 0.1);
+  }
+}
+
+// Empty state styling
+.ag-overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: rgba($background, 0.8);
+}
+
+.ag-overlay-no-rows-center {
+  padding: $spacing-8;
+  text-align: center;
+  color: $text-secondary;
+  font-size: $font-size-md;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-4;
+}
+
+// Responsive styles
+@media (max-width: $breakpoint-sm) {
+  .ag-theme-alpine {
+    --ag-font-size: 12px;
+    
+    .ag-header-cell, .ag-cell {
+      padding: $spacing-2;
+    }
+    
+    .ag-paging-panel {
+      flex-direction: column;
+      align-items: center;
+      gap: $spacing-2;
+    }
+  }
+}
+
+@media (min-width: $breakpoint-sm) and (max-width: $breakpoint-md) {
+  .ag-theme-alpine {
+    .ag-header-cell-label {
+      white-space: normal;
+      line-height: 1.2;
+    }
+    
+    .ag-cell {
+      white-space: normal;
+      line-height: 1.2;
+    }
+  }
+}
+
+@media (min-width: $breakpoint-md) {
+  .ag-theme-alpine {
+    --ag-font-size: 13px;
+    
+    .ag-paging-panel {
+      flex-direction: row;
+    }
+  }
+}
