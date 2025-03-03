@@ -1,0 +1,73 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Prevents sensitive environment files from being included in the Docker image
+.env
+.venv
+env/
+venv/
+ENV/
+.env.*
+!.env.example
+*.local
+
+# Excludes testing artifacts that aren't needed in production
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+coverage.xml
+*.cover
+tests/
+test_*.py
+*_test.py
+
+# Removes version control files that have no purpose in the container
+.git
+.gitignore
+.gitattributes
+
+# Excludes documentation and configuration files not needed for runtime
+docs/
+*.md
+README*
+LICENSE
+Makefile
+docker-compose*.yml
+.dockerignore
+
+# Prevents IDE configuration files from being included in the image
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Excludes logs and local data directories
+*.log
+logs/
+instance/
+.webassets-cache
+data/
+
+# Ensures Docker doesn't include itself during build context creation
+Dockerfile*
+docker/
