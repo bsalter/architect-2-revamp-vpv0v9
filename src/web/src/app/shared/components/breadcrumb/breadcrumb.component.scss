@@ -1,0 +1,81 @@
+// Import variables and mixins for consistent styling
+@import '../../../styles/abstracts/_variables';
+@import '../../../styles/abstracts/_mixins';
+
+// Breadcrumb container
+.breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  padding: $spacing-2 0;
+  margin-bottom: $spacing-3;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+// Breadcrumb list with flex layout and proper reset
+.breadcrumb-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+// Individual breadcrumb item
+.breadcrumb-item {
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+}
+
+// Styling for breadcrumb links
+.breadcrumb-link {
+  color: $text-secondary;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+  
+  &:hover {
+    color: $primary;
+    text-decoration: underline;
+  }
+  
+  &:focus {
+    outline: none;
+    @include focus-visible($primary);
+  }
+}
+
+// Current/active breadcrumb text
+.breadcrumb-text {
+  color: $text-primary;
+  font-weight: 500;
+}
+
+// Separator between breadcrumb items
+.breadcrumb-separator {
+  margin: 0 $spacing-2;
+  color: $text-secondary;
+}
+
+// Empty breadcrumb placeholder
+.breadcrumb-empty {
+  height: $spacing-3;
+}
+
+// Active breadcrumb item modifier class
+.active {
+  color: $text-primary;
+  font-weight: 500;
+}
+
+// Responsive adjustments for larger screens
+@include respond-to(sm) {
+  .breadcrumb-nav {
+    font-size: inherit;
+  }
+  
+  .breadcrumb-separator {
+    margin: 0 $spacing-3;
+  }
+}
