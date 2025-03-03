@@ -1,0 +1,127 @@
+// =============================================================================
+// MAIN STYLESHEET
+// =============================================================================
+//
+// This is the main entry point for all styles in the Interaction Management
+// System. It follows the 7-1 pattern (7 folders, 1 file) for SCSS organization
+// and ensures all partials are imported in the correct order to maintain
+// proper CSS cascading.
+//
+// The styles support both the Finder interface and Interaction forms with
+// a focus on responsive design and accessibility.
+//
+// =============================================================================
+
+// 1. ABSTRACTS
+// =============================================================================
+// Variables, functions, and mixins that don't output CSS when compiled
+@import 'abstracts/variables';
+@import 'abstracts/functions';
+@import 'abstracts/mixins';
+
+// 2. VENDORS
+// =============================================================================
+// Third-party CSS, including Tailwind and AG Grid
+@import 'vendors';
+
+// 3. BASE
+// =============================================================================
+// Boilerplate code including CSS resets, normalize, typography, and accessibility
+@import 'base/reset';
+@import 'base/normalize';
+@import 'base/typography';
+@import 'base/accessibility';
+
+// 4. LAYOUT
+// =============================================================================
+// Structural elements that organize the main sections of the page
+@import 'layout/header';
+@import 'layout/footer';
+@import 'layout/grid';
+@import 'layout/navigation';
+
+// 5. COMPONENTS
+// =============================================================================
+// Specific UI components with their own styles
+@import 'components/buttons';
+@import 'components/forms';
+@import 'components/alerts';
+@import 'components/cards';
+@import 'components/modals';
+@import 'components/tables';
+
+// 6. PAGES
+// =============================================================================
+// Page-specific styles
+@import 'pages/auth';
+@import 'pages/dashboard';
+@import 'pages/finder';
+@import 'pages/form';
+
+// 7. THEMES
+// =============================================================================
+// Different theme variations
+@import 'themes/default';
+@import 'themes/dark';
+
+// 8. UTILITIES
+// =============================================================================
+// Utility classes for adjusting spacing, text, visibility, etc.
+@import 'utilities/spacing';
+@import 'utilities/text';
+@import 'utilities/visibility';
+
+// =============================================================================
+// GLOBAL STYLES & OVERRIDES
+// =============================================================================
+
+// Apply box-sizing border-box consistently
+html {
+  box-sizing: border-box;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+// Base body styles
+body {
+  font-family: $font-family-base;
+  font-size: $font-size-base;
+  line-height: $line-height-normal;
+  color: $text-primary;
+  background-color: $background;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Make images responsive by default
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+// Ensure main content area takes available space
+main {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
+// Focus outline for keyboard navigation
+:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+}
+
+// Respect user preference for reduced motion
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+}
