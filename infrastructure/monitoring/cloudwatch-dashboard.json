@@ -1,0 +1,446 @@
+{
+  "dashboard_name": "${resource_prefix}-dashboard",
+  "dashboard_body": {
+    "widgets": [
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "# Interaction Management System - Operational Dashboard",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "System Health Overview",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/Route53", "HealthCheckStatus", "HealthCheckId", "${HEALTH_CHECK_ID}", { "label": "System Availability" } ],
+            [ "AWS/ApplicationELB", "HealthyHostCount", "LoadBalancer", "${ALB_NAME}", { "label": "Healthy Hosts" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "stat": "Average",
+          "annotations": {
+            "horizontal": [
+              { "value": 0.999, "label": "Critical Threshold", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "API Response Time",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "ApiResponseTime", "Environment", "${ENVIRONMENT}", "Component", "Backend", { "label": "API Response Time (ms)", "stat": "p95" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "yAxis": {
+            "left": {
+              "min": 0,
+              "max": 3000
+            }
+          },
+          "annotations": {
+            "horizontal": [
+              { "value": 500, "label": "Warning", "color": "#ffcc00" },
+              { "value": 2000, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Error Rates",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "ApiErrorRate", "Environment", "${ENVIRONMENT}", "Component", "Backend", { "label": "API Error Rate (%)" } ],
+            [ "AWS/ApplicationELB", "HTTPCode_Target_5XX_Count", "LoadBalancer", "${ALB_NAME}", { "label": "5XX Errors" } ],
+            [ "AWS/ApplicationELB", "HTTPCode_Target_4XX_Count", "LoadBalancer", "${ALB_NAME}", { "label": "4XX Errors" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 0.01, "label": "Warning Threshold", "color": "#ffcc00" },
+              { "value": 0.05, "label": "Critical Threshold", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "## Infrastructure Metrics",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Frontend CPU Utilization",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "${FRONTEND_ASG_NAME}", { "label": "Frontend CPU" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 70, "label": "Warning", "color": "#ffcc00" },
+              { "value": 85, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Backend CPU Utilization",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "${BACKEND_ASG_NAME}", { "label": "Backend CPU" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 70, "label": "Warning", "color": "#ffcc00" },
+              { "value": 85, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Memory Utilization",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "CWAgent", "MemoryUtilization", "AutoScalingGroupName", "${FRONTEND_ASG_NAME}", { "label": "Frontend Memory" } ],
+            [ "CWAgent", "MemoryUtilization", "AutoScalingGroupName", "${BACKEND_ASG_NAME}", { "label": "Backend Memory" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 70, "label": "Warning", "color": "#ffcc00" },
+              { "value": 85, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "## Database and Cache Metrics",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Database Query Performance",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/RDS", "ReadLatency", "DBInstanceIdentifier", "${DB_INSTANCE_ID}", { "label": "Read Latency" } ],
+            [ "AWS/RDS", "WriteLatency", "DBInstanceIdentifier", "${DB_INSTANCE_ID}", { "label": "Write Latency" } ],
+            [ "InteractionManagement", "QueryExecutionTime", "Environment", "${ENVIRONMENT}", "Component", "Database", { "label": "Query Execution Time" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 0.3, "label": "Warning", "color": "#ffcc00" },
+              { "value": 1.0, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Database Connections",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/RDS", "DatabaseConnections", "DBInstanceIdentifier", "${DB_INSTANCE_ID}", { "label": "Active Connections" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": "${DB_CONNECTION_THRESHOLD_WARNING}", "label": "Warning", "color": "#ffcc00" },
+              { "value": "${DB_CONNECTION_THRESHOLD_CRITICAL}", "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Cache Performance",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/ElastiCache", "CacheHitRate", "CacheClusterId", "${CACHE_CLUSTER_ID}", { "label": "Cache Hit Ratio" } ],
+            [ "AWS/ElastiCache", "CurrConnections", "CacheClusterId", "${CACHE_CLUSTER_ID}", { "label": "Current Connections" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 0.8, "label": "Warning", "color": "#ffcc00" },
+              { "value": 0.6, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "## User Experience and Frontend Metrics",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Page Load Performance",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "PageLoadTime", "Environment", "${ENVIRONMENT}", { "label": "Page Load Time (ms)" } ],
+            [ "InteractionManagement", "TimeToInteractive", "Environment", "${ENVIRONMENT}", { "label": "Time to Interactive (ms)" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 3000, "label": "Warning", "color": "#ffcc00" },
+              { "value": 5000, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "JavaScript Errors",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "JavaScriptErrorCount", "Environment", "${ENVIRONMENT}", { "label": "JS Errors" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "API Request Volume",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "AWS/ApplicationELB", "RequestCount", "LoadBalancer", "${ALB_NAME}", { "label": "Total Requests" } ],
+            [ "InteractionManagement", "SearchRequestCount", "Environment", "${ENVIRONMENT}", { "label": "Search Requests" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "## Security and Authentication Metrics",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Authentication Activity",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "LoginSuccessCount", "Environment", "${ENVIRONMENT}", { "label": "Successful Logins" } ],
+            [ "InteractionManagement", "AuthenticationFailures", "Environment", "${ENVIRONMENT}", { "label": "Failed Logins" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Auth Service Performance",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionSystem/Auth", "AuthLatency", { "label": "Auth Service Latency" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300,
+          "annotations": {
+            "horizontal": [
+              { "value": 500, "label": "Warning", "color": "#ffcc00" },
+              { "value": 2000, "label": "Critical", "color": "#ff0000" }
+            ]
+          }
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Access Denials",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "PermissionDenied", "Environment", "${ENVIRONMENT}", { "label": "Permission Denied Events" } ],
+            [ "InteractionManagement", "CrossSiteAccessAttempt", "Environment", "${ENVIRONMENT}", { "label": "Cross-Site Access Attempts" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "## Business Metrics",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "User Activity",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "UniqueActiveUsers", "Environment", "${ENVIRONMENT}", { "label": "Active Users" } ],
+            [ "InteractionManagement", "SessionCount", "Environment", "${ENVIRONMENT}", { "label": "Active Sessions" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Interaction Management",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "InteractionCreated", "Environment", "${ENVIRONMENT}", { "label": "Created" } ],
+            [ "InteractionManagement", "InteractionUpdated", "Environment", "${ENVIRONMENT}", { "label": "Updated" } ],
+            [ "InteractionManagement", "InteractionDeleted", "Environment", "${ENVIRONMENT}", { "label": "Deleted" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "metric",
+        "width": 8,
+        "height": 6,
+        "properties": {
+          "title": "Search Effectiveness",
+          "view": "timeSeries",
+          "stacked": false,
+          "metrics": [
+            [ "InteractionManagement", "SearchQueryCount", "Environment", "${ENVIRONMENT}", { "label": "Search Queries" } ],
+            [ "InteractionManagement", "ZeroResultRate", "Environment", "${ENVIRONMENT}", { "label": "Zero Result Rate" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 300
+        }
+      },
+      {
+        "type": "text",
+        "width": 24,
+        "height": 1,
+        "properties": {
+          "markdown": "## SLA Compliance",
+          "background": "transparent"
+        }
+      },
+      {
+        "type": "metric",
+        "width": 24,
+        "height": 6,
+        "properties": {
+          "title": "SLA Metrics",
+          "view": "singleValue",
+          "metrics": [
+            [ "InteractionManagement", "SystemAvailability", "Environment", "${ENVIRONMENT}", { "label": "System Availability" } ],
+            [ "InteractionManagement", "ApiResponseSlaCompliance", "Environment", "${ENVIRONMENT}", { "label": "API Response Time Compliance" } ],
+            [ "InteractionManagement", "ErrorRateSlaCompliance", "Environment", "${ENVIRONMENT}", { "label": "Error Rate Compliance" } ],
+            [ "InteractionManagement", "DatabaseSlaCompliance", "Environment", "${ENVIRONMENT}", { "label": "Database Performance Compliance" } ]
+          ],
+          "region": "${AWS_REGION}",
+          "period": 86400,
+          "stat": "Average",
+          "setPeriodToTimeRange": true
+        }
+      }
+    ]
+  }
+}
