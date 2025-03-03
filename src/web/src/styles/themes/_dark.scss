@@ -1,0 +1,252 @@
+// Dark Theme Color Palette
+// Primary colors
+$color-primary: #60A5FA;
+$color-secondary: #9CA3AF;
+$color-success: #34D399;
+$color-warning: #FBBF24;
+$color-danger: #F87171;
+
+// Background and surface colors
+$color-background: #121826;
+$color-surface: #1F2937;
+
+// Text colors
+$color-text-primary: #F9FAFB;
+$color-text-secondary: #D1D5DB;
+$color-border: #374151;
+
+// Input elements
+$color-input-background: #1F2937;
+$color-input-border: #4B5563;
+$color-input-text: #F9FAFB;
+$color-input-placeholder: #9CA3AF;
+$color-input-focus-border: #60A5FA;
+
+// Disabled state
+$color-disabled-background: #374151;
+$color-disabled-text: #9CA3AF;
+
+// Links
+$color-link: #60A5FA;
+$color-link-hover: #93C5FD;
+
+// Utility colors
+$color-shadow: rgba(0, 0, 0, 0.25);
+$color-overlay: rgba(0, 0, 0, 0.75);
+
+// Shadow definitions
+$shadow-sm: 0 1px 2px 0 $color-shadow;
+$shadow-md: 0 4px 6px -1px $color-shadow;
+$shadow-lg: 0 10px 15px -3px $color-shadow;
+$shadow-xl: 0 20px 25px -5px $color-shadow;
+
+// Dark theme class definition
+.dark-theme,
+[data-theme="dark"] {
+  background-color: $color-background;
+  color: $color-text-primary;
+  
+  // Base components
+  --bg-primary: #{$color-background};
+  --bg-secondary: #{$color-surface};
+  --text-primary: #{$color-text-primary};
+  --text-secondary: #{$color-text-secondary};
+  --border-color: #{$color-border};
+  
+  // Interactive elements
+  --btn-primary-bg: #{$color-primary};
+  --btn-primary-text: #{$color-text-primary};
+  --btn-secondary-bg: #{$color-secondary};
+  --btn-secondary-text: #{$color-text-primary};
+  --btn-success-bg: #{$color-success};
+  --btn-warning-bg: #{$color-warning};
+  --btn-danger-bg: #{$color-danger};
+  
+  // Form elements
+  --input-bg: #{$color-input-background};
+  --input-border: #{$color-input-border};
+  --input-text: #{$color-input-text};
+  --input-placeholder: #{$color-input-placeholder};
+  --input-focus-border: #{$color-input-focus-border};
+  
+  // Table and data display
+  --table-header-bg: #{$color-surface};
+  --table-row-bg: #{$color-background};
+  --table-row-alt-bg: #{lighten($color-background, 3%)};
+  --table-border: #{$color-border};
+  
+  // Card and container elements
+  --card-bg: #{$color-surface};
+  --card-border: #{$color-border};
+  --card-shadow: #{$shadow-md};
+  
+  // Modal and overlay
+  --modal-bg: #{$color-surface};
+  --modal-overlay: #{$color-overlay};
+  
+  // Disabled states
+  --disabled-bg: #{$color-disabled-background};
+  --disabled-text: #{$color-disabled-text};
+  
+  // Links
+  --link-color: #{$color-link};
+  --link-hover-color: #{$color-link-hover};
+  
+  // Shadows
+  --shadow-sm: #{$shadow-sm};
+  --shadow-md: #{$shadow-md};
+  --shadow-lg: #{$shadow-lg};
+  --shadow-xl: #{$shadow-xl};
+}
+
+// Function to apply dark theme
+@mixin applyDarkTheme() {
+  .dark-theme,
+  [data-theme="dark"] {
+    // Apply all dark theme variables
+    
+    // Finder component specific overrides
+    .finder-table {
+      background-color: $color-surface;
+      
+      .ag-header {
+        background-color: darken($color-surface, 3%);
+        color: $color-text-primary;
+        border-bottom: 1px solid $color-border;
+      }
+      
+      .ag-row {
+        background-color: $color-surface;
+        border-bottom: 1px solid $color-border;
+        
+        &.ag-row-odd {
+          background-color: lighten($color-surface, 3%);
+        }
+        
+        &.ag-row-selected {
+          background-color: rgba($color-primary, 0.2);
+        }
+      }
+      
+      .ag-cell {
+        color: $color-text-primary;
+      }
+    }
+    
+    // Form components
+    .form-control {
+      background-color: $color-input-background;
+      border-color: $color-input-border;
+      color: $color-input-text;
+      
+      &::placeholder {
+        color: $color-input-placeholder;
+      }
+      
+      &:focus {
+        border-color: $color-input-focus-border;
+        box-shadow: 0 0 0 2px rgba($color-primary, 0.25);
+      }
+      
+      &:disabled {
+        background-color: $color-disabled-background;
+        color: $color-disabled-text;
+      }
+    }
+    
+    // Button styling
+    .btn {
+      &-primary {
+        background-color: $color-primary;
+        color: $color-text-primary;
+        
+        &:hover {
+          background-color: darken($color-primary, 10%);
+        }
+        
+        &:disabled {
+          background-color: $color-disabled-background;
+          color: $color-disabled-text;
+        }
+      }
+      
+      &-secondary {
+        background-color: $color-secondary;
+        color: $color-text-primary;
+        
+        &:hover {
+          background-color: darken($color-secondary, 10%);
+        }
+      }
+      
+      &-success {
+        background-color: $color-success;
+        color: $color-text-primary;
+        
+        &:hover {
+          background-color: darken($color-success, 10%);
+        }
+      }
+      
+      &-warning {
+        background-color: $color-warning;
+        color: darken($color-background, 30%);
+        
+        &:hover {
+          background-color: darken($color-warning, 10%);
+        }
+      }
+      
+      &-danger {
+        background-color: $color-danger;
+        color: $color-text-primary;
+        
+        &:hover {
+          background-color: darken($color-danger, 10%);
+        }
+      }
+    }
+    
+    // Navigation
+    .nav-link {
+      color: $color-text-secondary;
+      
+      &:hover, &.active {
+        color: $color-text-primary;
+      }
+    }
+    
+    // Modal overlay
+    .modal-backdrop {
+      background-color: $color-overlay;
+    }
+    
+    .modal-content {
+      background-color: $color-surface;
+      border-color: $color-border;
+      box-shadow: $shadow-lg;
+    }
+    
+    // Date picker customization
+    .datepicker {
+      background-color: $color-surface;
+      border-color: $color-border;
+      color: $color-text-primary;
+      
+      .calendar-header {
+        background-color: darken($color-surface, 3%);
+      }
+      
+      .calendar-day {
+        &:hover {
+          background-color: rgba($color-primary, 0.2);
+        }
+        
+        &.selected {
+          background-color: $color-primary;
+          color: $color-text-primary;
+        }
+      }
+    }
+  }
+}
