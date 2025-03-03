@@ -1,0 +1,327 @@
+@import '../../../styles/abstracts/_variables';
+@import '../../../styles/abstracts/_mixins';
+
+.app-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $surface;
+  border-bottom: 1px solid $border;
+  z-index: $z-index-fixed;
+  @include elevation(2);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-3;
+  @include flex(row, space-between, center, nowrap);
+  
+  @include respond-to(md) {
+    padding: $spacing-4;
+  }
+}
+
+.header-left {
+  @include flex(row, flex-start, center, nowrap);
+  gap: $spacing-3;
+}
+
+.header-right {
+  @include flex(row, flex-end, center, nowrap);
+  gap: $spacing-3;
+}
+
+.logo {
+  img {
+    height: 32px;
+    
+    @include respond-to(md) {
+      height: 40px;
+    }
+  }
+}
+
+.menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: $text-primary;
+  font-size: 24px;
+  
+  @include respond-to(md) {
+    display: none;
+  }
+  
+  &:hover {
+    color: $primary;
+  }
+  
+  @include focus-visible;
+}
+
+.main-nav {
+  position: fixed;
+  top: 60px;
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 60px);
+  background-color: $surface;
+  z-index: $z-index-fixed - 1;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  
+  &.open {
+    transform: translateX(0);
+  }
+  
+  @include respond-to(md) {
+    position: static;
+    height: auto;
+    transform: none;
+    display: block;
+    width: auto;
+    background-color: transparent;
+    margin-left: $spacing-4;
+  }
+}
+
+.nav-list {
+  list-style: none;
+  padding: $spacing-4;
+  margin: 0;
+  
+  @include respond-to(md) {
+    @include flex(row, flex-start, center, nowrap);
+    padding: 0;
+    gap: $spacing-4;
+  }
+}
+
+.nav-item {
+  margin-bottom: $spacing-3;
+  
+  @include respond-to(md) {
+    margin-bottom: 0;
+  }
+  
+  a {
+    display: block;
+    padding: $spacing-2;
+    color: $text-primary;
+    text-decoration: none;
+    font-weight: $font-weight-medium;
+    transition: $transition-base;
+    border-radius: $border-radius-md;
+    
+    &:hover,
+    &.active {
+      color: $primary;
+      background-color: rgba($primary, 0.1);
+    }
+    
+    @include focus-visible;
+  }
+}
+
+.site-selector {
+  position: relative;
+  
+  @include respond-to(md) {
+    margin-right: $spacing-3;
+  }
+}
+
+.site-dropdown-toggle {
+  padding: $spacing-2 $spacing-3;
+  background-color: rgba($primary, 0.1);
+  border: none;
+  border-radius: $border-radius-md;
+  color: $primary;
+  cursor: pointer;
+  @include flex(row, center, center, nowrap);
+  gap: $spacing-2;
+  font-weight: $font-weight-medium;
+  
+  &:hover {
+    background-color: rgba($primary, 0.15);
+  }
+  
+  @include focus-visible;
+}
+
+.site-name {
+  @include truncate-text(1);
+  max-width: 120px;
+  
+  @include respond-to(md) {
+    max-width: 200px;
+  }
+}
+
+.dropdown-arrow {
+  font-size: 12px;
+  transition: transform 0.2s ease;
+  
+  .open & {
+    transform: rotate(180deg);
+  }
+}
+
+.site-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-md;
+  margin-top: $spacing-2;
+  padding: $spacing-2 0;
+  z-index: $z-index-dropdown;
+  @include elevation(3);
+  display: none;
+  
+  &.open {
+    display: block;
+    animation: dropdown-appear 0.2s ease-out;
+  }
+}
+
+.site-dropdown li {
+  a {
+    display: block;
+    padding: $spacing-2 $spacing-3;
+    text-decoration: none;
+    color: $text-primary;
+    
+    &:hover {
+      background-color: rgba($primary, 0.05);
+    }
+  }
+  
+  &.active a {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+    font-weight: $font-weight-medium;
+  }
+}
+
+.user-menu {
+  position: relative;
+}
+
+.user-dropdown-toggle {
+  padding: $spacing-2;
+  background: transparent;
+  border: none;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  @include flex(row, center, center, nowrap);
+  gap: $spacing-2;
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+  }
+  
+  @include focus-visible;
+}
+
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: rgba($primary, 0.2);
+  color: $primary;
+  @include flex(row, center, center, nowrap);
+  font-size: 16px;
+}
+
+.username {
+  display: none;
+  
+  @include respond-to(md) {
+    display: inline-block;
+    color: $text-primary;
+    font-weight: $font-weight-medium;
+    @include truncate-text(1);
+    max-width: 120px;
+  }
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: $border-radius-md;
+  margin-top: $spacing-2;
+  z-index: $z-index-dropdown;
+  @include elevation(3);
+  display: none;
+  
+  &.open {
+    display: block;
+    animation: dropdown-appear 0.2s ease-out;
+  }
+}
+
+.user-info {
+  padding: $spacing-3;
+  border-bottom: 1px solid $border;
+  
+  .username-full {
+    display: block;
+    font-weight: $font-weight-medium;
+    color: $text-primary;
+    margin-bottom: $spacing-2;
+  }
+  
+  .user-email {
+    display: block;
+    color: $text-secondary;
+    font-size: 0.875rem;
+    @include truncate-text(1);
+  }
+}
+
+.user-dropdown li {
+  a {
+    display: block;
+    padding: $spacing-3;
+    text-decoration: none;
+    color: $text-primary;
+    transition: $transition-base;
+    
+    &:hover {
+      background-color: rgba($primary, 0.05);
+    }
+  }
+}
+
+.breadcrumb-container {
+  padding: $spacing-2 $spacing-3;
+  background-color: $background;
+  border-bottom: 1px solid $border;
+}
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
