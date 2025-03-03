@@ -1,0 +1,179 @@
+// Import design system variables and mixins
+@import '../../../../styles/abstracts/_variables';
+@import '../../../../styles/abstracts/_mixins';
+
+// Main container for the login screen
+.login-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: $spacing-4;
+  background-color: $background;
+  
+  @include respond-to(xs) {
+    padding: $spacing-2;
+  }
+  
+  @include respond-to(sm) {
+    padding: $spacing-4;
+  }
+}
+
+// Card containing the login form
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  padding: $spacing-4;
+  
+  @include respond-to(sm) {
+    padding: $spacing-6;
+  }
+}
+
+// Header section with logo and title
+.login-header {
+  text-align: center;
+  margin-bottom: $spacing-4;
+  
+  h1 {
+    margin-top: $spacing-3;
+    margin-bottom: $spacing-2;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: $text-primary;
+  }
+  
+  p {
+    color: $text-secondary;
+    font-size: 0.875rem;
+  }
+}
+
+// Logo styling
+.logo {
+  height: 48px;
+  width: auto;
+  margin: 0 auto;
+}
+
+// Form group container
+.form-group {
+  margin-bottom: $spacing-4;
+  width: 100%;
+  
+  label {
+    display: block;
+    margin-bottom: $spacing-2;
+    font-weight: 500;
+    color: $text-primary;
+    
+    &[required]::after {
+      content: '*';
+      color: $danger;
+      margin-left: 0.25rem;
+    }
+  }
+}
+
+// Form input styling
+.form-control {
+  @include input-style('text');
+  width: 100%;
+  
+  &.is-invalid {
+    @include input-style('text', true);
+  }
+}
+
+// Row for remember me and forgot password
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-4;
+  
+  @include respond-to(xs) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-2;
+  }
+}
+
+// Remember me checkbox styling
+.remember-me {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  
+  input[type='checkbox'] {
+    cursor: pointer;
+  }
+  
+  label {
+    margin-bottom: 0;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+}
+
+// Forgot password link styling
+.forgot-password {
+  color: $primary;
+  text-decoration: none;
+  font-size: 0.875rem;
+  cursor: pointer;
+  
+  &:hover {
+    text-decoration: underline;
+  }
+  
+  &:focus {
+    @include focus-visible($primary);
+  }
+}
+
+// Base button styling
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2 $spacing-4;
+  border-radius: $border-radius-md;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// Primary button styling
+.btn-primary {
+  @include button-style('primary');
+}
+
+// Full-width button
+.btn-block {
+  width: 100%;
+}
+
+// Loading indicator styling
+app-loading-indicator {
+  display: block;
+  margin-top: $spacing-3;
+  text-align: center;
+}
+
+// Error message styling
+app-error-message {
+  margin-top: $spacing-2;
+  display: block;
+}
