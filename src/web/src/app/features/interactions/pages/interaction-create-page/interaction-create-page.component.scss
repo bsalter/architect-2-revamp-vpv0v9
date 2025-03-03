@@ -1,0 +1,52 @@
+@import '../../../../../styles/abstracts/_variables';
+@import '../../../../../styles/abstracts/_mixins';
+
+.create-page-container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: $spacing-4 0;
+}
+
+.card-container {
+  background-color: $surface;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-wrapper {
+  padding: $spacing-6;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+// Ensure the interaction form takes full width of its container
+::ng-deep app-interaction-form {
+  width: 100%;
+  display: block;
+}
+
+// Responsive styling for small screens (mobile)
+@include respond-to-max(sm) {
+  .form-wrapper {
+    padding: $spacing-4;
+  }
+  
+  .card-container {
+    border-radius: $border-radius-md;
+  }
+}
