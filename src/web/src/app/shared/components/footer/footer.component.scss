@@ -1,0 +1,78 @@
+// Import design tokens and mixins
+@import '../../../styles/abstracts/_variables';
+@import '../../../styles/abstracts/_mixins';
+
+// Main footer container - provides the base structure and layout for the footer
+.footer-container {
+  @include flex(column, space-between, center);
+  padding: $spacing-4 $spacing-6;
+  background-color: $surface;
+  border-top: 1px solid $border;
+  color: $text-secondary;
+  font-size: $font-size-sm;
+  width: 100%;
+  margin-top: auto; // Push footer to the bottom of the container
+
+  // On medium-sized screens and larger, change to horizontal layout
+  @include respond-to(md) {
+    flex-direction: row;
+  }
+}
+
+// Container for copyright and version information
+.footer-left {
+  @include flex(column, center, center);
+  text-align: center;
+  margin-bottom: $spacing-4;
+
+  // On medium-sized screens and larger, align text to the left
+  @include respond-to(md) {
+    align-items: flex-start;
+    text-align: left;
+    margin-bottom: 0;
+  }
+}
+
+// Copyright text styling
+.copyright {
+  margin: 0 0 $spacing-2 0;
+}
+
+// Version text styling - slightly smaller and more subtle than copyright
+.version {
+  margin: 0;
+  font-size: $font-size-xs;
+  opacity: 0.8;
+}
+
+// Container for footer navigation links
+.footer-links {
+  @include flex(row, center, center, wrap);
+
+  // On medium-sized screens and larger, align links to the right
+  @include respond-to(md) {
+    justify-content: flex-end;
+  }
+}
+
+// Footer link styling with appropriate hover/focus states for accessibility
+.footer-links a {
+  color: $text-secondary;
+  text-decoration: none;
+  margin: 0 $spacing-2;
+  transition: color 0.2s ease-in-out;
+
+  &:hover, &:focus {
+    color: $primary;
+    text-decoration: underline;
+  }
+
+  // Remove margins from edges to avoid extra spacing
+  &:last-child {
+    margin-right: 0;
+  }
+
+  &:first-child {
+    margin-left: 0;
+  }
+}
