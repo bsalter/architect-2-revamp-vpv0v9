@@ -1,0 +1,58 @@
+<div class="finder-table-container">
+  <!-- Desktop view with AG Grid -->
+  <div class="desktop-view">
+    <ag-grid-angular
+      class="ag-theme-alpine"
+      [rowData]="searchResults?.items"
+      [columnDefs]="columnDefs"
+      [gridOptions]="gridOptions"
+      (gridReady)="onGridReady($event)"
+      (rowSelected)="onRowSelected($event)"
+      (cellClicked)="onCellClicked($event)"
+      (sortChanged)="handleSortChanged($event)"
+      (filterChanged)="handleFilterChanged($event)">
+    </ag-grid-angular>
+  </div>
+
+  <!-- Mobile view with cards -->
+  <div class="mobile-view">
+    <ng-container *ngIf="searchResults?.items?.length > 0">
+      <div 
+        *ngFor="let item of searchResults?.items" 
+        class="interaction-card"
+        (click)="onRowSelected({data: item, node: {isSelected: () => true}})">
+        <div class="card-title">{{ item.title }}</div>
+        <div class="card-metadata">
+          <span class="type-badge {{ item.type }}">{{ item.type }}</span>
+          <span class="lead">{{ item.lead }}</span>
+        </div>
+        <div class="card-datetime">{{ formatDate(item.startDatetime) }}</div>
+        <div class="card-location">Location: {{ item.location || 'N/A' }}</div>
+        <div class="card-actions">
+          <button class="edit-button" (click)="$event.stopPropagation(); editInteraction.emit(item.id)">Edit</button>
+          <button class="delete-button" (click)="$event.stopPropagation(); deleteInteraction.emit(item.id)">Delete</button>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+
+  <!-- No results state -->
+  <div class="no-results" *ngIf="searchResults?.items?.length === 0 && !loading">
+    <p>No interactions found. Try adjusting your search or filters.</p>
+  </div>
+
+  <!-- Loading state -->
+  <app-loading-indicator *ngIf="loading"></app-loading-indicator>
+
+  <!-- Pagination -->
+  <div class="pagination-container" *ngIf="searchResults?.items?.length > 0 && !loading">
+    <div class="results-info">
+      Showing {{ (currentPage - 1) * pageSize + 1 }} - {{ (currentPage - 1) * pageSize + searchResults?.items?.length }} of {{ totalItems }} items
+    </div>
+    <app-pagination
+      [currentPage]="currentPage"
+      [totalPages]="Math.ceil(totalItems / pageSize)"
+      (pageChanged)="onPageChanged($event)">
+    </app-pagination>
+  </div>
+</div>
