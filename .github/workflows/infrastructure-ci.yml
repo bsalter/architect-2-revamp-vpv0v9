@@ -1,0 +1,184 @@
+name: Infrastructure CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: ['main']
+    paths:
+      - 'infrastructure/**'
+  push:
+    branches: ['main']
+    paths:
+      - 'infrastructure/**'
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly run on Sunday at midnight
+
+env:
+  TF_ROOT: 'infrastructure/terraform'
+  AWS_REGION: 'us-east-1'
+  TERRAFORM_VERSION: '1.5.4'
+
+permissions:
+  contents: read
+  pull-requests: write
+  security-events: write
+
+jobs:
+  terraform-validate:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Initialize Terraform
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform init -backend=false
+
+      - name: Validate Terraform configuration
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform validate
+
+      - name: Check formatting
+        working-directory: ${{ env.TF_ROOT }}
+        run: terraform fmt -check -recursive
+
+  terraform-lint:
+    name: Lint Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v3
+        with:
+          tflint_version: "v0.46.1"
+
+      - name: Initialize TFLint
+        working-directory: ${{ env.TF_ROOT }}
+        run: tflint --init
+
+      - name: Run TFLint
+        working-directory: ${{ env.TF_ROOT }}
+        run: tflint --recursive --format compact
+
+  terraform-security:
+    name: Security Check Terraform
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Run tfsec
+        uses: aquasecurity/tfsec-action@v1.0.0
+        with:
+          working_directory: ${{ env.TF_ROOT }}
+          format: sarif
+          output_file: tfsec.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: tfsec.sarif
+        if: always()  # Always upload results even if there are findings
+
+  terraform-plan:
+    name: Plan Terraform Changes
+    needs: [terraform-validate, terraform-lint, terraform-security]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+
+      - name: Setup Terraform plugins cache
+        uses: actions/cache@v3
+        with:
+          path: ~/.terraform.d/plugin-cache
+          key: ${{ runner.os }}-terraform-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: ${{ runner.os }}-terraform-
+
+      - name: Initialize Terraform
+        working-directory: ${{ env.TF_ROOT }}
+        run: |
+          terraform init
+          mkdir -p plan_outputs
+
+      - name: Plan Dev Environment
+        working-directory: ${{ env.TF_ROOT }}
+        run: |
+          terraform workspace select dev || terraform workspace new dev
+          terraform plan -var-file=environments/dev.tfvars -out=plan_outputs/dev.tfplan
+          terraform show -no-color plan_outputs/dev.tfplan > plan_outputs/dev.txt
+
+      - name: Plan Staging Environment
+        working-directory: ${{ env.TF_ROOT }}
+        run: |
+          terraform workspace select staging || terraform workspace new staging
+          terraform plan -var-file=environments/staging.tfvars -out=plan_outputs/staging.tfplan
+          terraform show -no-color plan_outputs/staging.tfplan > plan_outputs/staging.txt
+
+      - name: Plan Production Environment
+        if: github.ref == 'refs/heads/main'
+        working-directory: ${{ env.TF_ROOT }}
+        run: |
+          terraform workspace select prod || terraform workspace new prod
+          terraform plan -var-file=environments/prod.tfvars -out=plan_outputs/prod.tfplan
+          terraform show -no-color plan_outputs/prod.tfplan > plan_outputs/prod.txt
+
+      - name: Post Plan Summary
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const devPlan = fs.existsSync('${{ env.TF_ROOT }}/plan_outputs/dev.txt') 
+              ? fs.readFileSync('${{ env.TF_ROOT }}/plan_outputs/dev.txt', 'utf8').substring(0, 65000) 
+              : 'No dev plan generated';
+            const stagingPlan = fs.existsSync('${{ env.TF_ROOT }}/plan_outputs/staging.txt') 
+              ? fs.readFileSync('${{ env.TF_ROOT }}/plan_outputs/staging.txt', 'utf8').substring(0, 65000) 
+              : 'No staging plan generated';
+            
+            const commentBody = `## Terraform Plan Results
+            
+            <details>
+            <summary>Dev Environment</summary>
+            
+            \`\`\`terraform
+            ${devPlan}
+            \`\`\`
+            </details>
+            
+            <details>
+            <summary>Staging Environment</summary>
+            
+            \`\`\`terraform
+            ${stagingPlan}
+            \`\`\`
+            </details>
+            
+            *Note: These plans represent what would happen if applied but no changes have been made.*
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: commentBody
+            });
