@@ -1,0 +1,25 @@
+<div class="container mx-auto px-4 py-6">
+  <!-- Breadcrumb navigation -->
+  <app-breadcrumb></app-breadcrumb>
+  
+  <!-- Page header with title and back button -->
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-semibold">{{ pageTitle }}</h1>
+    <button type="button" class="btn btn-secondary" routerLink="/interactions">
+      <i class="fas fa-arrow-left mr-2"></i> Back
+    </button>
+  </div>
+  
+  <!-- Card container for the form -->
+  <div class="bg-white rounded-lg shadow-md p-6">
+    <!-- Loading indicator shown during form submission -->
+    <app-loading-indicator [show]="submitting$ | async" *ngIf="submitting$ | async"></app-loading-indicator>
+    
+    <!-- Interaction form component -->
+    <app-interaction-form 
+      [isEditMode]="false"
+      (formSubmitted)="onFormSubmit($event)"
+      (formCancelled)="onFormCancel()">
+    </app-interaction-form>
+  </div>
+</div>
