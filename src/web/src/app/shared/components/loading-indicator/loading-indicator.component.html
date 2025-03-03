@@ -1,0 +1,4 @@
+<div class="loading-indicator-container" *ngIf="show" [ngClass]="getContainerClasses()" role="status" [attr.aria-label]="ariaLabel">
+  <div class="spinner" [ngClass]="getSizeClass()"></div>
+  <div class="loading-text" *ngIf="showText">{{text}}</div>
+</div>
