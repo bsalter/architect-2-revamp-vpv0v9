@@ -1,0 +1,65 @@
+<div class="container mx-auto px-4 py-8 max-w-md">
+  <div class="bg-white rounded-lg shadow-lg p-6">
+    <!-- Header Section -->
+    <div class="text-center mb-6">
+      <img src="assets/images/logo.png" alt="Company Logo" class="h-16 mx-auto mb-4">
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">Select a Site</h1>
+      <p class="text-gray-600">Please select which site you want to access:</p>
+    </div>
+
+    <!-- Site Selection Area -->
+    <div class="mb-6">
+      <!-- Site list with radio buttons -->
+      <div class="space-y-3" *ngIf="sites && sites.length > 0">
+        <div *ngFor="let site of sites" class="flex items-center p-3 border rounded-md hover:bg-gray-50">
+          <input 
+            type="radio" 
+            [id]="'site-' + site.id" 
+            name="siteSelection" 
+            class="h-5 w-5 text-primary" 
+            [checked]="selectedSiteId === site.id"
+            (change)="updateSelectedSite(site.id)">
+          <label [for]="'site-' + site.id" class="ml-3 block text-sm font-medium text-gray-700 cursor-pointer w-full">
+            {{ site.name }}
+          </label>
+        </div>
+      </div>
+
+      <!-- No sites available message -->
+      <div *ngIf="sites && sites.length === 0" class="text-center p-4 text-gray-500">
+        <p>You don't have access to any sites. Please contact your administrator.</p>
+      </div>
+
+      <!-- Error message -->
+      <div *ngIf="hasError" class="mt-4 p-3 bg-red-50 text-red-700 rounded-md text-sm">
+        <p>There was a problem selecting your site. Please try again or contact support.</p>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="flex justify-between space-x-4">
+      <button 
+        type="button" 
+        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+        (click)="cancelSelection()"
+        [disabled]="isLoading">
+        Cancel
+      </button>
+      <button 
+        type="button" 
+        class="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary-light"
+        (click)="selectSite()"
+        [disabled]="!selectedSiteId || isLoading">
+        Continue
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading Indicator -->
+  <app-loading-indicator 
+    [show]="isLoading"
+    [fullscreen]="true"
+    [text]="'Loading site data...'"
+    [ariaLabel]="'Please wait while site data is loading'">
+  </app-loading-indicator>
+</div>
