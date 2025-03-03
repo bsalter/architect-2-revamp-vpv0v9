@@ -1,0 +1,56 @@
+<div>
+  <!-- Semi-transparent overlay that covers the page behind the modal -->
+  <div class="modal-backdrop" tabindex="-1" (click)="onCancel()"></div>
+  
+  <!-- Container for the modal dialog content -->
+  <div 
+    class="modal-content" 
+    role="dialog" 
+    aria-modal="true" 
+    aria-labelledby="modalTitle" 
+    aria-describedby="modalDescription"
+    (keydown.escape)="onCancel()">
+    
+    <!-- Modal header with title -->
+    <div class="modal-header">
+      <h3 class="modal-title" id="modalTitle">{{ title }}</h3>
+    </div>
+    
+    <!-- Modal body with confirmation message -->
+    <div class="modal-body">
+      <p class="confirmation-message" id="modalDescription">{{ message }}</p>
+      
+      <!-- Optional details section for additional information like deletion details -->
+      <div *ngIf="details && details.length > 0" class="detail-section">
+        <ng-container *ngFor="let detail of details">
+          <p class="detail-item">{{ detail }}</p>
+        </ng-container>
+      </div>
+    </div>
+    
+    <!-- Modal footer with action buttons -->
+    <div class="modal-footer">
+      <button 
+        type="button"
+        class="btn btn-secondary"
+        (click)="onCancel()">
+        {{ cancelButtonText || 'Cancel' }}
+      </button>
+      <button 
+        type="button"
+        class="btn"
+        [ngClass]="buttonClass || 'btn-danger'"
+        (click)="onConfirm()"
+        #confirmButton>
+        <!-- Show loading indicator when processing the confirmation -->
+        <app-loading-indicator
+          *ngIf="processing"
+          [show]="true"
+          [inline]="true"
+          [size]="'small'">
+        </app-loading-indicator>
+        <span>{{ confirmButtonText || 'Confirm' }}</span>
+      </button>
+    </div>
+  </div>
+</div>
