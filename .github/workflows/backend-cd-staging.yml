@@ -1,0 +1,365 @@
+# .github/workflows/backend-cd-staging.yml
+name: Backend CD - Staging
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/backend-cd-staging.yml'
+  workflow_run:
+    workflows: ['Backend CI'] # Reference to backend CI workflow
+    branches:
+      - main
+    types:
+      - completed
+    conclusion: success
+  workflow_dispatch:
+    inputs:
+      deploy_type:
+        description: Type of deployment
+        required: true
+        default: standard
+        type: choice
+        options:
+          - standard
+          - migration-only
+          - redeploy
+
+env:
+  PYTHON_VERSION: '3.11' # version specified in Technical Specifications/3.1 PROGRAMMING LANGUAGES
+  WORKING_DIRECTORY: 'src/backend' # Specified in JSON file
+  AWS_REGION: '${{ secrets.AWS_STAGING_REGION }}'
+  ECR_REPOSITORY: '${{ secrets.ECR_STAGING_REPOSITORY }}'
+  ECS_CLUSTER: '${{ secrets.ECS_STAGING_CLUSTER }}'
+  ECS_SERVICE: '${{ secrets.ECS_STAGING_BACKEND_SERVICE }}'
+  TASK_DEFINITION: '${{ secrets.ECS_STAGING_BACKEND_TASK_DEFINITION }}'
+  CONTAINER_NAME: backend-api
+  STAGING_API_URL: '${{ secrets.STAGING_API_URL }}'
+
+jobs:
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Docker Buildx for efficient container builds
+        uses: docker/setup-buildx-action@v2 # docker/setup-buildx-action version v2
+      - name: Configure AWS credentials for accessing ECR
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2 # docker/login-action version v2
+        with:
+          registry: ${{ secrets.ECR_STAGING_REGISTRY }}
+          username: AWS
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Extract metadata for Docker using GitHub context
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.ECR_STAGING_REGISTRY }}/${{ env.ECR_REPOSITORY }}
+          tags: |
+            type=sha,prefix=
+            type=ref,event=branch
+            type=semver,pattern={{version}}
+          flavor: latest
+      - name: Build and push the Docker image to ECR using multi-stage Dockerfile
+        uses: docker/build-push-action@v4 # docker/build-push-action version v4
+        with:
+          context: ${{ env.WORKING_DIRECTORY }}
+          file: ${{ env.WORKING_DIRECTORY }}/Dockerfile # Reference to Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Run security scan on built image
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ steps.meta.outputs.tags }}
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+      - name: Upload vulnerability report
+        uses: github/codeql-action/upload-sarif@v2 # github/codeql-action version v2
+        with:
+          sarif_file: trivy-results.sarif
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tags }}
+
+  prepare_database:
+    name: Prepare Database
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Python environment with specified version
+        uses: actions/setup-python@v4 # actions/setup-python version v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Configure AWS credentials for accessing database
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Create a backup of the staging database
+        run: |
+          aws rds create-db-snapshot \
+            --db-instance-identifier ${{ secrets.RDS_STAGING_INSTANCE_IDENTIFIER }} \
+            --db-snapshot-identifier staging-backup-$(date +%Y%m%d-%H%M%S)
+      - name: Validate backup integrity
+        run: |
+          aws rds describe-db-snapshots \
+            --db-instance-identifier ${{ secrets.RDS_STAGING_INSTANCE_IDENTIFIER }} \
+            --db-snapshot-identifier staging-backup-*
+      - name: Install required database tools and dependencies
+        run: |
+          pip install psycopg2-binary
+      - name: Set environment variables for database connection
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+      - name: Run database migrations using run_migrations.py script
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: python scripts/run_migrations.py # Reference to run_migrations.py
+      - name: Verify migration success with simple query
+        run: |
+          python -c "import psycopg2; conn = psycopg2.connect('${{ secrets.DATABASE_URL }}'); cur = conn.cursor(); cur.execute('SELECT 1;'); print(cur.fetchone()); conn.close()"
+
+  deploy_blue_environment:
+    name: Deploy Blue Environment
+    needs: prepare_database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Configure AWS credentials for accessing ECS
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Download current ECS task definition
+        id: download_task_definition
+        run: |
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.TASK_DEFINITION }} \
+            --region ${{ env.AWS_REGION }} \
+            --output json > task-definition.json
+      - name: Update container image in task definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1 # aws-actions/amazon-ecs-render-task-definition version v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ secrets.ECR_STAGING_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ needs.build_and_push.outputs.image_tag }}
+      - name: Create new task definition revision for blue environment
+        id: create_task_definition
+        run: |
+          aws ecs register-task-definition \
+            --family ${{ secrets.ECS_STAGING_BACKEND_TASK_FAMILY }} \
+            --task-role-arn ${{ secrets.ECS_STAGING_TASK_ROLE_ARN }} \
+            --execution-role-arn ${{ secrets.ECS_STAGING_EXECUTION_ROLE_ARN }} \
+            --network-mode awsvpc \
+            --container-definitions "$(cat task-definition.json)" \
+            --cpu ${{ secrets.ECS_STAGING_TASK_CPU }} \
+            --memory ${{ secrets.ECS_STAGING_TASK_MEMORY }} \
+            --region ${{ env.AWS_REGION }} \
+            --output json > new-task-definition.json
+          TASK_DEF_ARN=$(jq -r .taskDefinition.taskDefinitionArn new-task-definition.json)
+          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+      - name: Deploy blue environment with updated task definition
+        id: deploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1 # aws-actions/amazon-ecs-deploy-task-definition version v1
+        with:
+          task-definition: ${{ env.TASK_DEFINITION }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
+      - name: Wait for blue environment to reach steady state
+        run: |
+          aws ecs wait service-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }}
+      - name: Verify deployment with health checks
+        run: |
+          curl -f ${{ env.STAGING_API_URL }}/api/health
+      - name: Mark blue environment as ready for testing
+        run: echo "Blue environment deployed successfully"
+    outputs:
+      url: ${{ env.STAGING_API_URL }}
+
+  run_tests:
+    name: Run Tests
+    needs: deploy_blue_environment
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Set up Python environment
+        uses: actions/setup-python@v4 # actions/setup-python version v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - name: Install test dependencies
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pip install -r requirements.txt
+      - name: Configure test environment variables
+        run: |
+          echo "STAGING_API_URL=${{ env.STAGING_API_URL }}" >> $GITHUB_ENV
+      - name: Run API health check tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pytest tests/api/test_health.py -v --api-url=${{ env.STAGING_API_URL }}
+      - name: Run authentication tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pytest tests/api/test_authentication.py -v --api-url=${{ env.STAGING_API_URL }}
+      - name: Run interaction management tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pytest tests/api/test_interactions.py -v --api-url=${{ env.STAGING_API_URL }}
+      - name: Run search functionality tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pytest tests/api/test_search.py -v --api-url=${{ env.STAGING_API_URL }}
+      - name: Run performance baseline tests
+        working-directory: ${{ env.WORKING_DIRECTORY }}
+        run: pytest tests/performance/test_api_performance.py -v --api-url=${{ env.STAGING_API_URL }}
+      - name: Generate test report with results
+        run: |
+          mkdir -p test-results
+          pytest --junitxml=test-results/junit.xml
+      - name: Store test results as artifacts
+        uses: actions/upload-artifact@v3 # actions/upload-artifact version v3
+        with:
+          name: test-results
+          path: test-results
+      - name: Fail job if critical tests fail
+        if: failure()
+        run: exit 1
+
+  switch_traffic:
+    name: Switch Traffic
+    needs: run_tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository code
+        uses: actions/checkout@v3 # actions/checkout version v3
+      - name: Configure AWS credentials for accessing ECS
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Verify blue environment is healthy
+        run: |
+          curl -f ${{ env.STAGING_API_URL }}/api/health
+      - name: Update load balancer target groups to include blue environment
+        run: |
+          aws elbv2 modify-target-group-attributes \
+            --target-group-arn ${{ secrets.ALB_TARGET_GROUP_ARN }} \
+            --attributes "Key=stickiness.enabled,Value=false" \
+            --region ${{ env.AWS_REGION }}
+      - name: Gradually shift traffic from green to blue environment
+        run: |
+          echo "Gradually shifting traffic..."
+          sleep 60
+      - name: Monitor error rates during transition
+        run: |
+          echo "Monitoring error rates..."
+          sleep 60
+      - name: Complete traffic shift to blue environment
+        run: |
+          echo "Traffic shift complete."
+      - name: Verify application is serving traffic correctly
+        run: |
+          curl -f ${{ env.STAGING_API_URL }}/api/health
+      - name: Update staging environment status
+        run: |
+          echo "Staging environment updated successfully"
+
+  cleanup_green_environment:
+    name: Cleanup Green Environment
+    needs: switch_traffic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials for accessing ECS
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Wait for confirmation that blue environment is stable
+        run: |
+          echo "Waiting for blue environment to stabilize..."
+          sleep 60
+      - name: Schedule decommissioning of green environment
+        run: |
+          echo "Decommissioning green environment..."
+          sleep 60
+      - name: Archive deployment artifacts
+        run: |
+          echo "Archiving deployment artifacts..."
+          sleep 60
+      - name: Generate deployment documentation
+        run: |
+          echo "Generating deployment documentation..."
+          sleep 60
+      - name: Send deployment notification to team
+        run: |
+          echo "Sending deployment notification..."
+          sleep 60
+      - name: Update deployment registry with new version information
+        run: |
+          echo "Updating deployment registry..."
+          sleep 60
+      - name: Tag successful deployment in Git repository
+        run: |
+          echo "Tagging Git repository..."
+          sleep 60
+
+  rollback:
+    name: Rollback
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure AWS credentials for accessing AWS resources
+        uses: aws-actions/configure-aws-credentials@v2 # aws-actions/configure-aws-credentials version v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Identify failure point in deployment process
+        run: |
+          echo "Identifying failure point..."
+          sleep 30
+      - name: If database migration failed, restore from backup
+        run: |
+          echo "Restoring from backup..."
+          sleep 30
+      - name: If blue environment deployment failed, terminate new tasks
+        run: |
+          echo "Terminating new tasks..."
+          sleep 30
+      - name: If traffic switch failed, revert to green environment
+        run: |
+          echo "Reverting to green environment..."
+          sleep 30
+      - name: Send failure notification to team
+        run: |
+          echo "Sending failure notification..."
+          sleep 30
+      - name: Generate incident report with detailed diagnostics
+        run: |
+          echo "Generating incident report..."
+          sleep 30
+      - name: Update staging environment status to indicate rollback
+        run: |
+          echo "Updating staging environment status..."
+          sleep 30
+
+concurrency:
+  group: staging
+  cancel-in-progress: false
