@@ -1,0 +1,171 @@
+@import '../../../styles/abstracts/_variables';
+@import '../../../styles/abstracts/_mixins';
+
+// Semi-transparent overlay that covers the page behind the modal
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: $z-index-modal;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: $spacing-4;
+  @include respond-to('sm') { padding: $spacing-3; }
+  @include respond-to('xs') { padding: $spacing-2; }
+}
+
+// Container for the modal dialog content
+.modal-content {
+  width: 100%;
+  max-width: 450px;
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  color: $text-primary;
+  @include elevation(3);
+  animation: modal-fade-in 0.2s ease-out;
+}
+
+// Header section containing the modal title
+.modal-header {
+  @include flex(row, space-between, center);
+  padding: $spacing-4 $spacing-4 $spacing-3;
+  border-bottom: 1px solid $border;
+  @include respond-to('sm') { padding: $spacing-3 $spacing-3 $spacing-2; }
+}
+
+// Title text in the header
+.modal-title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+// Main content area containing the confirmation message
+.modal-body {
+  padding: $spacing-3 $spacing-4;
+  @include respond-to('sm') { padding: $spacing-2 $spacing-3; }
+}
+
+// Text styling for the confirmation message
+.confirmation-message {
+  margin: 0 0 $spacing-3;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+// Footer section containing the action buttons
+.modal-footer {
+  @include flex(row, flex-end, center);
+  gap: $spacing-2;
+  padding: $spacing-3 $spacing-4 $spacing-4;
+  border-top: 1px solid $border;
+  @include respond-to('sm') { padding: $spacing-2 $spacing-3 $spacing-3; }
+  @include respond-to('xs') { 
+    flex-direction: column-reverse; 
+    width: 100%; 
+  }
+  
+  & > button {
+    @include respond-to('xs') {
+      width: 100%;
+      margin-bottom: $spacing-2;
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Base button styling
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-2 $spacing-4;
+  border-radius: $border-radius-md;
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+  
+  &:focus {
+    @include focus-visible;
+  }
+}
+
+// Styling for the primary action button (confirm)
+.btn-primary {
+  background-color: $primary;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: darken($primary, 10%);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: darken($primary, 15%);
+  }
+}
+
+// Styling for the danger action button (delete)
+.btn-danger {
+  background-color: $danger;
+  color: white;
+  
+  &:hover:not(:disabled) {
+    background-color: darken($danger, 10%);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: darken($danger, 15%);
+  }
+}
+
+// Styling for the secondary action button (cancel)
+.btn-secondary {
+  background-color: transparent;
+  color: $text-primary;
+  border-color: $border;
+  
+  &:hover:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+  
+  &:active:not(:disabled) {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Container for the loading spinner when processing
+.loading-indicator-container {
+  display: inline-flex;
+  align-items: center;
+  margin-left: $spacing-2;
+  
+  @include respond-to('xs') {
+    justify-content: center;
+  }
+}
+
+// Animation for modal appearance
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
