@@ -1,0 +1,40 @@
+{
+  "id": 1,
+  "username": "testuser",
+  "email": "testuser@example.com",
+  "password": "TestPassword123!",
+  "lastLogin": "2023-07-15T09:30:00Z",
+  "createdAt": "2023-06-01T10:00:00Z",
+  "sites": [
+    {
+      "id": 1,
+      "name": "Headquarters",
+      "description": "Main corporate headquarters",
+      "role": "SITE_ADMIN"
+    },
+    {
+      "id": 2,
+      "name": "Northwest Regional Office",
+      "description": "Regional office serving the northwest territory",
+      "role": "EDITOR"
+    },
+    {
+      "id": 3,
+      "name": "Southwest Regional Office",
+      "description": "Regional office serving the southwest territory",
+      "role": "VIEWER"
+    },
+    {
+      "id": 4,
+      "name": "Eastern Division",
+      "description": "Regional office serving the eastern territory",
+      "role": "EDITOR"
+    }
+  ],
+  "token": {
+    "access_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaXNzIjoiaW50ZXJhY3Rpb24tbWFuYWdlciIsImlhdCI6MTY4OTQxMjY1MiwiZXhwIjoxNjg5NDE0NDUyLCJzaXRlcyI6WzEsMiwzLDRdLCJuYW1lIjoiVGVzdCBVc2VyIiwiZW1haWwiOiJ0ZXN0dXNlckBleGFtcGxlLmNvbSJ9.signature",
+    "expires_in": 1800,
+    "token_type": "Bearer",
+    "refresh_token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwiaXNzIjoiaW50ZXJhY3Rpb24tbWFuYWdlciIsImlhdCI6MTY4OTQxMjY1MiwiZXhwIjoxNjkwMDE3NDUyLCJ0eXBlIjoicmVmcmVzaCJ9.signature"
+  }
+}
