@@ -1,0 +1,133 @@
+// =============================================================================
+// TAILWIND CSS INTEGRATION
+// =============================================================================
+//
+// This file integrates Tailwind CSS with the Interaction Management System's
+// design system. It configures Tailwind's utility classes to work with our
+// application's design tokens while preventing conflicts with other styling
+// components.
+//
+// =============================================================================
+
+// Import design tokens from variables to ensure consistency
+@import '../abstracts/_variables';
+
+// =============================================================================
+// TAILWIND CONFIGURATION
+// =============================================================================
+
+// Toggle for Tailwind's preflight (normalized styles)
+// Set to false to prevent conflicts with application's base styles
+$enable-tailwind-preflight: false !default;
+
+// Map of Tailwind colors synchronized with SCSS variables
+// for use in non-Tailwind contexts
+$tailwind-config-colors: () !default;
+
+// =============================================================================
+// TAILWIND DIRECTIVES
+// =============================================================================
+
+// Conditionally import Tailwind's base styles depending on the preflight toggle
+@if $enable-tailwind-preflight {
+  @tailwind base;
+} @else {
+  @tailwind base {
+    // Only import non-preflight base styles
+    // This prevents conflicts with our custom reset and normalize
+  }
+}
+
+// Import Tailwind's component styles
+@tailwind components;
+
+// Custom Component Styles
+@layer components {
+  // Custom components with Tailwind utilities
+  .form-input {
+    @apply rounded-md border-border px-3 py-2 focus:border-primary focus:ring-primary;
+  }
+  
+  .btn {
+    @apply rounded-md px-4 py-2 font-medium transition-colors;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary/90;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary/90;
+  }
+  
+  .btn-danger {
+    @apply bg-danger text-white hover:bg-danger/90;
+  }
+}
+
+// Import Tailwind's utility classes
+@tailwind utilities;
+
+// Custom Utilities
+@layer utilities {
+  // Custom utility classes
+  .text-shadow {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE ADJUSTMENTS
+// =============================================================================
+
+// Custom variant for interaction finder table on mobile
+@responsive {
+  .finder-card-view {
+    @apply rounded-md border border-border p-4 mb-4;
+  }
+}
+
+// =============================================================================
+// INTEGRATION COMPATIBILITY
+// =============================================================================
+
+// AG Grid Compatibility Fixes
+// Ensures Tailwind and AG Grid styles work together properly
+.ag-theme-alpine {
+  @apply font-sans;
+  
+  // Reset any tailwind styles that might interfere with AG Grid
+  [class^='ag-']:not(.ag-theme-alpine) {
+    all: revert;
+  }
+}
+
+// =============================================================================
+// TAILWIND CONFIG REFERENCE
+// =============================================================================
+// This section is for reference only - the actual configuration is
+// in tailwind.config.js. It serves as documentation for how our design tokens
+// map to Tailwind's configuration.
+//
+// Theme configuration:
+// - colors: Uses our design system colors ($primary, $secondary, etc.)
+// - fontFamily: Uses Inter as the base font family
+// - fontSize: Maps to our typographic scale
+// - spacing: Uses our spacing scale
+// - borderRadius: Maps to our border radius variables
+// - boxShadow: Uses our shadow definitions
+// - screens: Maps to our breakpoint definitions (xs, sm, md, lg, xl)
+//
+// Plugins:
+// - @tailwindcss/forms: v0.5.4 - Provides better form styling defaults
+// - @tailwindcss/typography: v0.5.9 - For rich text formatting
+//
+// =============================================================================
