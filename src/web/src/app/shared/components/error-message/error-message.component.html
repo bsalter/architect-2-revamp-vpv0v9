@@ -1,0 +1,15 @@
+<div class="error-message-container" role="alert" aria-live="assertive">
+  <div class="error-message"
+       [class.error-message-validation]="type === 'validation'"
+       [class.error-message-warning]="type === 'warning'"
+       [class.error-message-system]="type === 'system'">
+    <div class="error-icon" *ngIf="showIcon">
+      <i class="fa"
+         [class.fa-exclamation-circle]="type === 'validation'"
+         [class.fa-exclamation-triangle]="type === 'warning'"
+         [class.fa-exclamation]="type === 'system'"
+         aria-hidden="true"></i>
+    </div>
+    <div class="error-text">{{ message }}</div>
+  </div>
+</div>
