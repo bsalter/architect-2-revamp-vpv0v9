@@ -1,0 +1,107 @@
+@import '../../../styles/abstracts/_variables';
+@import '../../../styles/components/_forms';
+
+// Search input container - holds the entire component
+.search-input-container {
+  width: 100%;
+  position: relative;
+  margin-bottom: $spacing-3;
+}
+
+// Wrapper for positioning the input and icons
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background-color: $input-background;
+  border: 1px solid $input-border;
+  border-radius: $border-radius-md;
+  transition: $transition-base;
+  box-shadow: $shadow-sm;
+  
+  // Focus state styling
+  &:focus-within {
+    border-color: $input-focus-border;
+    box-shadow: 0 0 0 3px $focus-ring;
+  }
+}
+
+// Search icon styling
+.search-icon {
+  position: absolute;
+  left: $spacing-3;
+  top: 50%;
+  transform: translateY(-50%);
+  color: $text-secondary;
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+// Input field styling
+.search-input {
+  flex: 1;
+  height: 2.5rem;
+  padding: $spacing-2 $spacing-3 $spacing-2 $spacing-4 * 1.5;
+  border: none;
+  background: transparent;
+  color: $input-text;
+  font-size: 0.875rem;
+  width: 100%;
+  outline: none;
+  box-shadow: none;
+  
+  // Placeholder styling
+  &::placeholder {
+    color: $input-placeholder;
+    opacity: 1;
+  }
+}
+
+// Clear button styling
+.clear-button {
+  position: absolute;
+  right: $spacing-3;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  border: none;
+  border-radius: 50%;
+  background: $text-secondary;
+  color: white;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: $transition-base;
+  opacity: 0.7;
+  
+  // Hover state
+  &:hover {
+    opacity: 1;
+    background: $primary;
+  }
+  
+  // Focus state
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px $focus-ring;
+  }
+}
+
+// Responsive adjustments for small screens
+@media (max-width: $breakpoint-sm) {
+  .search-input-container {
+    margin-bottom: $spacing-2;
+  }
+  
+  .search-input {
+    font-size: 1rem;
+  }
+  
+  .input-wrapper {
+    width: 100%;
+  }
+}
