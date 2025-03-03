@@ -1,0 +1,566 @@
+// =============================================================================
+// TEXT UTILITIES
+// =============================================================================
+//
+// This file provides text-related utility classes for controlling text alignment,
+// decoration, transformation, wrapping, overflow, and styling properties.
+// These utilities complement the typography classes defined in _typography.scss
+// with additional functionality specific to the Interaction Management System.
+//
+// =============================================================================
+
+// Import required variables and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// TEXT ALIGNMENT
+// =============================================================================
+
+.text-left {
+  text-align: left;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-justify {
+  text-align: justify;
+}
+
+// =============================================================================
+// TEXT WRAPPING & OVERFLOW
+// =============================================================================
+
+.text-wrap {
+  white-space: normal;
+}
+
+.text-nowrap {
+  white-space: nowrap;
+}
+
+.text-truncate {
+  @include truncate-text(1);
+}
+
+.text-truncate-2 {
+  @include truncate-text(2);
+}
+
+.text-truncate-3 {
+  @include truncate-text(3);
+}
+
+.text-break {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+// =============================================================================
+// TEXT TRANSFORMATION
+// =============================================================================
+
+.text-lowercase {
+  text-transform: lowercase;
+}
+
+.text-uppercase {
+  text-transform: uppercase;
+}
+
+.text-capitalize {
+  text-transform: capitalize;
+}
+
+// =============================================================================
+// TEXT DECORATION
+// =============================================================================
+
+.text-decoration-none {
+  text-decoration: none;
+}
+
+.text-decoration-underline {
+  text-decoration: underline;
+}
+
+.text-decoration-line-through {
+  text-decoration: line-through;
+}
+
+// =============================================================================
+// FONT WEIGHT & STYLE
+// =============================================================================
+
+.font-regular {
+  font-weight: $font-weight-regular;
+}
+
+.font-medium {
+  font-weight: $font-weight-medium;
+}
+
+.font-semibold {
+  font-weight: $font-weight-semibold;
+}
+
+.font-bold {
+  font-weight: $font-weight-bold;
+}
+
+.font-italic {
+  font-style: italic;
+}
+
+.font-normal {
+  font-style: normal;
+}
+
+// =============================================================================
+// LINE HEIGHT
+// =============================================================================
+
+.line-height-none {
+  line-height: $line-height-none;
+}
+
+.line-height-tight {
+  line-height: $line-height-tight;
+}
+
+.line-height-snug {
+  line-height: $line-height-snug;
+}
+
+.line-height-normal {
+  line-height: $line-height-normal;
+}
+
+// =============================================================================
+// FONT SIZE
+// =============================================================================
+
+.text-xs {
+  font-size: $font-size-xs;
+}
+
+.text-sm {
+  font-size: $font-size-sm;
+}
+
+.text-md {
+  font-size: $font-size-md;
+}
+
+.text-lg {
+  font-size: $font-size-lg;
+}
+
+.text-xl {
+  font-size: $font-size-xl;
+}
+
+// =============================================================================
+// TEXT COLORS
+// =============================================================================
+
+.text-primary {
+  color: $text-primary;
+}
+
+.text-secondary {
+  color: $text-secondary;
+}
+
+.text-brand {
+  color: $primary;
+}
+
+.text-success {
+  color: $success;
+}
+
+.text-warning {
+  color: $warning;
+}
+
+.text-danger {
+  color: $danger;
+}
+
+// =============================================================================
+// ADDITIONAL TEXT UTILITIES
+// =============================================================================
+
+.text-muted {
+  opacity: 0.75;
+}
+
+.text-hidden {
+  text-indent: -9999px;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.text-shadow {
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.text-shadow-none {
+  text-shadow: none;
+}
+
+// Letter spacing utilities
+.letter-spacing-tight {
+  letter-spacing: -0.025em;
+}
+
+.letter-spacing-normal {
+  letter-spacing: 0;
+}
+
+.letter-spacing-wide {
+  letter-spacing: 0.025em;
+}
+
+// Word spacing utilities
+.word-spacing-tight {
+  word-spacing: -0.05em;
+}
+
+.word-spacing-normal {
+  word-spacing: 0;
+}
+
+.word-spacing-wide {
+  word-spacing: 0.05em;
+}
+
+// Vertical alignment utilities
+.vertical-align-baseline {
+  vertical-align: baseline;
+}
+
+.vertical-align-top {
+  vertical-align: top;
+}
+
+.vertical-align-middle {
+  vertical-align: middle;
+}
+
+.vertical-align-bottom {
+  vertical-align: bottom;
+}
+
+.vertical-align-text-top {
+  vertical-align: text-top;
+}
+
+.vertical-align-text-bottom {
+  vertical-align: text-bottom;
+}
+
+.vertical-align-sub {
+  vertical-align: sub;
+}
+
+.vertical-align-super {
+  vertical-align: super;
+}
+
+// =============================================================================
+// COMPONENT-SPECIFIC TEXT CLASSES
+// =============================================================================
+
+// Interaction Finder specific text styles
+.finder-title {
+  font-weight: $font-weight-semibold;
+  font-size: $font-size-sm;
+  line-height: $line-height-tight;
+  color: $text-primary;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.finder-subtitle {
+  font-weight: $font-weight-regular;
+  font-size: $font-size-xs;
+  line-height: $line-height-snug;
+  color: $text-secondary;
+}
+
+// Form-specific text styles
+.form-label-text {
+  font-weight: $font-weight-medium;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+  color: $text-primary;
+  margin-bottom: 0.25rem;
+}
+
+.required-field-text {
+  color: $danger;
+  margin-left: 0.25rem;
+}
+
+.help-text {
+  font-size: $font-size-xs;
+  line-height: $line-height-snug;
+  color: $text-secondary;
+  margin-top: 0.25rem;
+}
+
+.error-text {
+  font-size: $font-size-xs;
+  line-height: $line-height-snug;
+  color: $danger;
+  margin-top: 0.25rem;
+}
+
+// =============================================================================
+// RESPONSIVE TEXT UTILITIES
+// =============================================================================
+
+// Generate responsive variants for the sm breakpoint
+@include respond-to(sm) {
+  .sm\:text-left {
+    text-align: left;
+  }
+  
+  .sm\:text-center {
+    text-align: center;
+  }
+  
+  .sm\:text-right {
+    text-align: right;
+  }
+  
+  .sm\:text-wrap {
+    white-space: normal;
+  }
+  
+  .sm\:text-nowrap {
+    white-space: nowrap;
+  }
+  
+  .sm\:text-truncate {
+    @include truncate-text(1);
+  }
+  
+  .sm\:text-xs {
+    font-size: $font-size-xs;
+  }
+  
+  .sm\:text-sm {
+    font-size: $font-size-sm;
+  }
+  
+  .sm\:text-md {
+    font-size: $font-size-md;
+  }
+  
+  .sm\:text-lg {
+    font-size: $font-size-lg;
+  }
+  
+  .sm\:font-regular {
+    font-weight: $font-weight-regular;
+  }
+  
+  .sm\:font-medium {
+    font-weight: $font-weight-medium;
+  }
+  
+  .sm\:font-semibold {
+    font-weight: $font-weight-semibold;
+  }
+  
+  .sm\:font-bold {
+    font-weight: $font-weight-bold;
+  }
+}
+
+// Generate responsive variants for the md breakpoint
+@include respond-to(md) {
+  .md\:text-left {
+    text-align: left;
+  }
+  
+  .md\:text-center {
+    text-align: center;
+  }
+  
+  .md\:text-right {
+    text-align: right;
+  }
+  
+  .md\:text-wrap {
+    white-space: normal;
+  }
+  
+  .md\:text-nowrap {
+    white-space: nowrap;
+  }
+  
+  .md\:text-truncate {
+    @include truncate-text(1);
+  }
+  
+  .md\:text-xs {
+    font-size: $font-size-xs;
+  }
+  
+  .md\:text-sm {
+    font-size: $font-size-sm;
+  }
+  
+  .md\:text-md {
+    font-size: $font-size-md;
+  }
+  
+  .md\:text-lg {
+    font-size: $font-size-lg;
+  }
+  
+  .md\:font-regular {
+    font-weight: $font-weight-regular;
+  }
+  
+  .md\:font-medium {
+    font-weight: $font-weight-medium;
+  }
+  
+  .md\:font-semibold {
+    font-weight: $font-weight-semibold;
+  }
+  
+  .md\:font-bold {
+    font-weight: $font-weight-bold;
+  }
+}
+
+// Generate responsive variants for the lg breakpoint
+@include respond-to(lg) {
+  .lg\:text-left {
+    text-align: left;
+  }
+  
+  .lg\:text-center {
+    text-align: center;
+  }
+  
+  .lg\:text-right {
+    text-align: right;
+  }
+  
+  .lg\:text-wrap {
+    white-space: normal;
+  }
+  
+  .lg\:text-nowrap {
+    white-space: nowrap;
+  }
+  
+  .lg\:text-truncate {
+    @include truncate-text(1);
+  }
+  
+  .lg\:text-xs {
+    font-size: $font-size-xs;
+  }
+  
+  .lg\:text-sm {
+    font-size: $font-size-sm;
+  }
+  
+  .lg\:text-md {
+    font-size: $font-size-md;
+  }
+  
+  .lg\:text-lg {
+    font-size: $font-size-lg;
+  }
+  
+  .lg\:font-regular {
+    font-weight: $font-weight-regular;
+  }
+  
+  .lg\:font-medium {
+    font-weight: $font-weight-medium;
+  }
+  
+  .lg\:font-semibold {
+    font-weight: $font-weight-semibold;
+  }
+  
+  .lg\:font-bold {
+    font-weight: $font-weight-bold;
+  }
+}
+
+// Generate responsive variants for the xl breakpoint
+@include respond-to(xl) {
+  .xl\:text-left {
+    text-align: left;
+  }
+  
+  .xl\:text-center {
+    text-align: center;
+  }
+  
+  .xl\:text-right {
+    text-align: right;
+  }
+  
+  .xl\:text-wrap {
+    white-space: normal;
+  }
+  
+  .xl\:text-nowrap {
+    white-space: nowrap;
+  }
+  
+  .xl\:text-truncate {
+    @include truncate-text(1);
+  }
+  
+  .xl\:text-xs {
+    font-size: $font-size-xs;
+  }
+  
+  .xl\:text-sm {
+    font-size: $font-size-sm;
+  }
+  
+  .xl\:text-md {
+    font-size: $font-size-md;
+  }
+  
+  .xl\:text-lg {
+    font-size: $font-size-lg;
+  }
+  
+  .xl\:font-regular {
+    font-weight: $font-weight-regular;
+  }
+  
+  .xl\:font-medium {
+    font-weight: $font-weight-medium;
+  }
+  
+  .xl\:font-semibold {
+    font-weight: $font-weight-semibold;
+  }
+  
+  .xl\:font-bold {
+    font-weight: $font-weight-bold;
+  }
+}
