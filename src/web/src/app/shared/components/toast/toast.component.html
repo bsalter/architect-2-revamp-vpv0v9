@@ -1,0 +1,27 @@
+<div class="toast-container" [class]="position" aria-live="polite">
+  <div *ngFor="let toast of activeToasts; trackBy: trackByFn"
+       class="toast"
+       [class.toast-success]="toast.type === 'success'"
+       [class.toast-error]="toast.type === 'error'"
+       [class.toast-warning]="toast.type === 'warning'"
+       [class.toast-info]="toast.type === 'info'"
+       [class.toast-removing]="toast.removing"
+       [@toastAnimation]="toast.removing ? 'removed' : 'visible'"
+       role="alert"
+       aria-atomic="true">
+    <div class="toast-header">
+      <div class="toast-icon">
+        <i class="fas"
+           [class.fa-check-circle]="toast.type === 'success'"
+           [class.fa-exclamation-circle]="toast.type === 'error'"
+           [class.fa-exclamation-triangle]="toast.type === 'warning'"
+           [class.fa-info-circle]="toast.type === 'info'"></i>
+      </div>
+      <div class="toast-title">{{toast.title}}</div>
+      <button type="button" class="toast-close" aria-label="Close" (click)="closeToast(toast)">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="toast-message">{{toast.message}}</div>
+  </div>
+</div>
