@@ -1,0 +1,466 @@
+// =============================================================================
+// GRID SYSTEM
+// =============================================================================
+//
+// This file provides a comprehensive grid framework for the Interaction 
+// Management System. It includes both a traditional 12-column flexbox grid and
+// modern CSS Grid Layout utilities to support various layout requirements
+// throughout the application.
+//
+// =============================================================================
+
+// Import variables and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// HELPER FUNCTIONS
+// =============================================================================
+
+// Calculate the percentage width for a specific number of columns
+@function calculate-column-width($columns) {
+  @return percentage($columns / $grid-columns);
+}
+
+// Generate all column classes for a specific breakpoint
+@mixin make-grid-columns($breakpoint) {
+  $infix: if($breakpoint == xs, "", "-#{$breakpoint}");
+
+  // Column base styles
+  .col#{$infix} {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: 100%;
+  }
+
+  .col#{$infix}-auto {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: 100%;
+  }
+
+  // Size-specific columns
+  @for $i from 1 through $grid-columns {
+    .col#{$infix}-#{$i} {
+      flex: 0 0 calculate-column-width($i);
+      max-width: calculate-column-width($i);
+    }
+  }
+
+  // Offset columns
+  @for $i from 0 through ($grid-columns - 1) {
+    .offset#{$infix}-#{$i} {
+      margin-left: if($i > 0, calculate-column-width($i), 0);
+    }
+  }
+
+  // Order classes
+  .order#{$infix}-first {
+    order: -1;
+  }
+
+  .order#{$infix}-last {
+    order: $grid-columns + 1;
+  }
+
+  @for $i from 0 through $grid-columns {
+    .order#{$infix}-#{$i} {
+      order: $i;
+    }
+  }
+}
+
+// =============================================================================
+// CONTAINER CLASSES
+// =============================================================================
+
+// Default container with responsive max-width
+.container {
+  width: 100%;
+  padding-right: ($grid-gutter-width / 2);
+  padding-left: ($grid-gutter-width / 2);
+  margin-right: auto;
+  margin-left: auto;
+
+  // Responsive max-widths at different breakpoints
+  @each $breakpoint, $max-width in $container-max-widths {
+    @include respond-to($breakpoint) {
+      max-width: $max-width;
+    }
+  }
+}
+
+// Full-width container
+.container-fluid {
+  width: 100%;
+  padding-right: ($grid-gutter-width / 2);
+  padding-left: ($grid-gutter-width / 2);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+// Narrow container with reduced max-width for focused content
+.container-narrow {
+  width: 100%;
+  padding-right: ($grid-gutter-width / 2);
+  padding-left: ($grid-gutter-width / 2);
+  margin-right: auto;
+  margin-left: auto;
+
+  // Progressive narrowing at larger breakpoints
+  @include respond-to(sm) {
+    max-width: 95%;
+  }
+
+  @include respond-to(md) {
+    max-width: 90%;
+  }
+
+  @include respond-to(lg) {
+    max-width: 85%;
+  }
+
+  @include respond-to(xl) {
+    max-width: 80%;
+  }
+}
+
+// =============================================================================
+// ROW AND COLUMN CLASSES (FLEXBOX GRID)
+// =============================================================================
+
+// Row container with negative margins to counteract column padding
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -($grid-gutter-width / 2);
+  margin-left: -($grid-gutter-width / 2);
+}
+
+// Row without gutters between columns
+.row-no-gutters {
+  margin-right: 0;
+  margin-left: 0;
+
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0;
+    padding-left: 0;
+  }
+}
+
+// Base column styles with padding
+.col,
+[class*="col-"] {
+  position: relative;
+  width: 100%;
+  padding-right: ($grid-gutter-width / 2);
+  padding-left: ($grid-gutter-width / 2);
+}
+
+// Generate column classes for XS breakpoint (default)
+@include make-grid-columns(xs);
+
+// Generate column classes for each larger breakpoint
+@each $breakpoint in map-keys($breakpoints) {
+  @if $breakpoint != xs {
+    @include respond-to($breakpoint) {
+      @include make-grid-columns($breakpoint);
+    }
+  }
+}
+
+// =============================================================================
+// MODERN CSS GRID LAYOUT
+// =============================================================================
+
+// Basic grid container with default gap
+.grid {
+  display: grid;
+  gap: $spacing-4;
+}
+
+// Grid column templates with responsive behavior
+.grid-cols-1 {
+  grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(1, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.grid-cols-6 {
+  grid-template-columns: repeat(2, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  @include respond-to(lg) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.grid-cols-12 {
+  grid-template-columns: repeat(4, 1fr);
+  
+  @include respond-to(sm) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+  
+  @include respond-to(md) {
+    grid-template-columns: repeat(12, 1fr);
+  }
+}
+
+// Grid gap utilities for controlling space between grid items
+.grid-gap-0 {
+  gap: 0;
+}
+
+.grid-gap-1 {
+  gap: $spacing-1;
+}
+
+.grid-gap-2 {
+  gap: $spacing-2;
+}
+
+.grid-gap-3 {
+  gap: $spacing-3;
+}
+
+.grid-gap-4 {
+  gap: $spacing-4;
+}
+
+// Grid flow direction utilities
+.grid-flow-row {
+  grid-auto-flow: row;
+}
+
+.grid-flow-col {
+  grid-auto-flow: column;
+}
+
+// Grid auto sizing utilities
+.grid-auto-rows {
+  grid-auto-rows: auto;
+}
+
+.grid-auto-cols {
+  grid-auto-columns: auto;
+}
+
+// =============================================================================
+// APPLICATION-SPECIFIC GRID LAYOUTS
+// =============================================================================
+
+// Interaction Finder grid layout
+// Structured for header, search bar, table, and pagination
+.grid-finder {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: $spacing-4;
+  height: 100%;
+}
+
+// Interaction Form grid layout
+// Single column on mobile, two columns on larger screens
+.grid-form {
+  display: grid;
+  gap: $spacing-4;
+  grid-template-columns: 1fr;
+  
+  @include respond-to(md) {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+// Full-width grid cell for form sections that should span all columns
+.grid-form-full {
+  grid-column: 1 / -1;
+}
+
+// Authentication page grid layout
+// Full height with split design on larger screens
+.grid-auth {
+  display: grid;
+  min-height: 100vh;
+  
+  @include respond-to(md) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// =============================================================================
+// COLUMN AND ROW SPAN UTILITIES
+// =============================================================================
+
+// Column span utilities for controlling how many columns an element spans
+.col-span-full {
+  grid-column: 1 / -1;
+}
+
+.col-span-2 {
+  grid-column: span 2;
+}
+
+.col-span-3 {
+  grid-column: span 3;
+}
+
+.col-span-4 {
+  grid-column: span 4;
+}
+
+.col-span-6 {
+  grid-column: span 6;
+}
+
+// Row span utilities for controlling how many rows an element spans
+.row-span-2 {
+  grid-row: span 2;
+}
+
+.row-span-3 {
+  grid-row: span 3;
+}
+
+// =============================================================================
+// RESPONSIVE VARIANTS FOR GRID UTILITIES
+// =============================================================================
+
+// Generate responsive variants for grid utilities at each breakpoint
+@each $breakpoint in map-keys($breakpoints) {
+  @if $breakpoint != xs {
+    @include respond-to($breakpoint) {
+      // Responsive grid column templates
+      .#{$breakpoint}\:grid-cols-1 {
+        grid-template-columns: repeat(1, 1fr);
+      }
+      
+      .#{$breakpoint}\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .#{$breakpoint}\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      
+      .#{$breakpoint}\:grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+      }
+      
+      .#{$breakpoint}\:grid-cols-6 {
+        grid-template-columns: repeat(6, 1fr);
+      }
+      
+      .#{$breakpoint}\:grid-cols-12 {
+        grid-template-columns: repeat(12, 1fr);
+      }
+      
+      // Responsive grid gap utilities
+      .#{$breakpoint}\:grid-gap-0 {
+        gap: 0;
+      }
+      
+      .#{$breakpoint}\:grid-gap-1 {
+        gap: $spacing-1;
+      }
+      
+      .#{$breakpoint}\:grid-gap-2 {
+        gap: $spacing-2;
+      }
+      
+      .#{$breakpoint}\:grid-gap-3 {
+        gap: $spacing-3;
+      }
+      
+      .#{$breakpoint}\:grid-gap-4 {
+        gap: $spacing-4;
+      }
+      
+      // Responsive column span utilities
+      .#{$breakpoint}\:col-span-full {
+        grid-column: 1 / -1;
+      }
+      
+      .#{$breakpoint}\:col-span-2 {
+        grid-column: span 2;
+      }
+      
+      .#{$breakpoint}\:col-span-3 {
+        grid-column: span 3;
+      }
+      
+      .#{$breakpoint}\:col-span-4 {
+        grid-column: span 4;
+      }
+      
+      .#{$breakpoint}\:col-span-6 {
+        grid-column: span 6;
+      }
+      
+      // Responsive row span utilities
+      .#{$breakpoint}\:row-span-2 {
+        grid-row: span 2;
+      }
+      
+      .#{$breakpoint}\:row-span-3 {
+        grid-row: span 3;
+      }
+      
+      // Responsive application-specific layouts
+      .#{$breakpoint}\:grid-form {
+        display: grid;
+        gap: $spacing-4;
+      }
+      
+      .#{$breakpoint}\:grid-finder {
+        display: grid;
+        gap: $spacing-4;
+      }
+      
+      .#{$breakpoint}\:grid-auth {
+        display: grid;
+      }
+    }
+  }
+}
