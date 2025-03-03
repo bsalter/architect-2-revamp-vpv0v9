@@ -1,0 +1,106 @@
+@import '../../../../../styles/abstracts/_variables';
+@import '../../../../../styles/abstracts/_mixins';
+
+// Main container for the interaction edit page
+.edit-page-container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: $spacing-4 0;
+}
+
+// Card container with shadow and rounded corners for the form
+.card-container {
+  background-color: $surface;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+  position: relative;
+  overflow: hidden;
+}
+
+// Wrapper around the form component with proper spacing
+.form-wrapper {
+  padding: $spacing-6;
+}
+
+// Overlay for indicating loading/processing state during form submission
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+  border-radius: inherit;
+}
+
+// Styling for the page title that includes the interaction name
+.page-title {
+  font-weight: 600;
+  margin-bottom: $spacing-4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Container for the page header with back button and title
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: $spacing-4;
+}
+
+// Styling for the back navigation button
+.back-button {
+  display: flex;
+  align-items: center;
+  color: $primary;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-left: -0.5rem;
+  border-radius: 0.25rem;
+  transition: all 0.2s ease-in-out;
+  
+  &:hover {
+    background-color: rgba(59, 130, 246, 0.1);
+  }
+  
+  &:focus {
+    outline: 2px solid rgba(59, 130, 246, 0.5);
+    outline-offset: 2px;
+  }
+}
+
+// Ensure the interaction form takes full width of its container
+::ng-deep app-interaction-form {
+  width: 100%;
+  display: block;
+}
+
+// Responsive styling for small screens (mobile)
+@include respond-to-max(sm) {
+  .form-wrapper {
+    padding: $spacing-4;
+  }
+  
+  .card-container {
+    border-radius: $border-radius-md;
+  }
+  
+  .page-title {
+    font-size: 1.25rem;
+  }
+  
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+}
