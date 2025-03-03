@@ -1,0 +1,433 @@
+// =============================================================================
+// MIXINS AND FUNCTIONS
+// =============================================================================
+//
+// This file contains reusable SCSS mixins and functions for the Interaction 
+// Management System. These utilities help maintain consistent styling patterns
+// and reduce code duplication across the application.
+//
+// =============================================================================
+
+// Import variables to use within mixins
+@import '../_variables';
+
+// =============================================================================
+// RESPONSIVE BREAKPOINTS
+// =============================================================================
+
+/// Generates media queries based on predefined breakpoints
+/// @param {String} $breakpoint - Name of the breakpoint from $breakpoints map
+/// @example
+///   @include respond-to(md) {
+///     font-size: 1.2rem;
+///   }
+@mixin respond-to($breakpoint) {
+  @if map-has-key($breakpoints, $breakpoint) {
+    @media (min-width: map-get($breakpoints, $breakpoint)) {
+      @content;
+    }
+  } @else {
+    @error "Unknown breakpoint: #{$breakpoint}. Expected one of: #{map-keys($breakpoints)}";
+  }
+}
+
+// =============================================================================
+// LAYOUT UTILITIES
+// =============================================================================
+
+/// Creates a flexbox container with specified properties
+/// @param {String} $direction [row] - flex-direction property
+/// @param {String} $justify [flex-start] - justify-content property
+/// @param {String} $align [stretch] - align-items property
+/// @param {String} $wrap [nowrap] - flex-wrap property
+/// @example
+///   @include flex(column, center, center);
+@mixin flex($direction: row, $justify: flex-start, $align: stretch, $wrap: nowrap) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  flex-wrap: $wrap;
+}
+
+// =============================================================================
+// TYPOGRAPHY
+// =============================================================================
+
+/// Sets typography styles based on predefined text roles
+/// @param {String} $style - The typography style (heading1, heading2, heading3, body, small, button, input)
+/// @example
+///   @include font-style(heading1);
+@mixin font-style($style) {
+  $styles: ();
+  
+  @if $style == 'heading1' {
+    $styles: $heading-1;
+  } @else if $style == 'heading2' {
+    $styles: $heading-2;
+  } @else if $style == 'heading3' {
+    $styles: $heading-3;
+  } @else if $style == 'body' {
+    $styles: $body-text;
+  } @else if $style == 'small' {
+    $styles: $small-text;
+  } @else if $style == 'button' {
+    $styles: $button-text;
+  } @else if $style == 'input' {
+    $styles: $input-text;
+  } @else {
+    @error "Unknown font style: #{$style}";
+  }
+  
+  font-family: $font-family-base;
+  font-size: map-get($styles, font-size);
+  font-weight: map-get($styles, font-weight);
+  line-height: map-get($styles, line-height);
+}
+
+/// Truncates text with an ellipsis after a specified number of lines
+/// @param {Number} $lines [1] - Number of lines to show before truncating
+/// @example
+///   @include truncate-text(2);
+@mixin truncate-text($lines: 1) {
+  @if $lines == 1 {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    // Fallback for browsers that don't support -webkit-line-clamp
+    @supports not (-webkit-line-clamp: $lines) {
+      position: relative;
+      max-height: calc(1em * #{map-get($body-text, line-height)} * #{$lines});
+      padding-right: 1rem;
+      overflow: hidden;
+      
+      &::after {
+        content: '...';
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        padding-left: 0.5rem;
+        background: $surface; // Should match the background
+      }
+    }
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY
+// =============================================================================
+
+/// Hides content visually while keeping it accessible to screen readers
+/// @example
+///   .screen-reader-text {
+///     @include visually-hidden;
+///   }
+@mixin visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+  border: 0;
+  clip-path: inset(50%);
+}
+
+/// Applies accessible focus styles for keyboard navigation
+/// @param {Color} $focus-color [$primary] - Color of the focus outline
+/// @param {Number} $width [2px] - Width of the focus outline
+/// @example
+///   .custom-element:focus-visible {
+///     @include focus-visible($primary-light, 3px);
+///   }
+@mixin focus-visible($focus-color: $primary, $width: 2px) {
+  outline: $width solid $focus-color;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 2px rgba($focus-color, 0.2);
+  transition: outline-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+// =============================================================================
+// EFFECTS
+// =============================================================================
+
+/// Creates elevation effect using box-shadow at different levels
+/// @param {Number} $level [1] - Elevation level (1-5)
+/// @example
+///   .card {
+///     @include elevation(2);
+///   }
+@mixin elevation($level: 1) {
+  @if $level == 1 {
+    box-shadow: $shadow-sm;
+  } @else if $level == 2 {
+    box-shadow: $shadow-md;
+  } @else if $level == 3 {
+    box-shadow: $shadow-lg;
+  } @else if $level == 4 {
+    box-shadow: $shadow-xl;
+  } @else if $level == 5 {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  } @else {
+    @error "Elevation level should be between 1 and 5";
+  }
+  
+  @if $level > 1 {
+    z-index: 1;
+  }
+}
+
+// =============================================================================
+// COMPONENT STYLES
+// =============================================================================
+
+/// Applies consistent button styling based on theme and variant
+/// @param {String} $variant [primary] - Button variant (primary, secondary, success, warning, danger)
+/// @param {Boolean} $outlined [false] - Whether to use outlined style
+/// @example
+///   .btn-primary {
+///     @include button-style(primary);
+///   }
+///   .btn-danger-outlined {
+///     @include button-style(danger, true);
+///   }
+@mixin button-style($variant: primary, $outlined: false) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $btn-padding-y $btn-padding-x;
+  font-family: $font-family-base;
+  font-size: $btn-font-size;
+  font-weight: $font-weight-medium;
+  line-height: $btn-line-height;
+  text-align: center;
+  text-decoration: none;
+  border: $btn-border-width solid transparent;
+  border-radius: $btn-border-radius;
+  transition: $btn-transition;
+  cursor: pointer;
+  
+  // Determine colors based on variant
+  $bg-color: $primary;
+  $text-color: white;
+  $border-color: $primary;
+  $hover-bg-color: $primary-dark;
+  $hover-text-color: white;
+  $hover-border-color: $primary-dark;
+  
+  @if $variant == 'secondary' {
+    $bg-color: $secondary;
+    $border-color: $secondary;
+    $hover-bg-color: $secondary-dark;
+    $hover-border-color: $secondary-dark;
+  } @else if $variant == 'success' {
+    $bg-color: $success;
+    $border-color: $success;
+    $hover-bg-color: $success-dark;
+    $hover-border-color: $success-dark;
+  } @else if $variant == 'warning' {
+    $bg-color: $warning;
+    $border-color: $warning;
+    $hover-bg-color: $warning-dark;
+    $hover-border-color: $warning-dark;
+  } @else if $variant == 'danger' {
+    $bg-color: $danger;
+    $border-color: $danger;
+    $hover-bg-color: $danger-dark;
+    $hover-border-color: $danger-dark;
+  }
+  
+  @if $outlined {
+    background-color: transparent;
+    color: $bg-color;
+    border-color: $bg-color;
+    
+    &:hover, &:focus {
+      background-color: rgba($bg-color, 0.1);
+      color: $hover-bg-color;
+      border-color: $hover-bg-color;
+    }
+    
+    &:active {
+      background-color: rgba($bg-color, 0.2);
+    }
+  } @else {
+    background-color: $bg-color;
+    color: $text-color;
+    border-color: $border-color;
+    
+    &:hover, &:focus {
+      background-color: $hover-bg-color;
+      border-color: $hover-border-color;
+    }
+    
+    &:active {
+      background-color: darken($hover-bg-color, 5%);
+    }
+  }
+  
+  &:disabled, &.disabled {
+    opacity: $disabled-opacity;
+    pointer-events: none;
+  }
+  
+  &:focus-visible {
+    @include focus-visible($bg-color);
+  }
+}
+
+/// Applies consistent form input styling
+/// @param {String} $type [text] - Input type (text, select, checkbox, radio)
+/// @param {Boolean} $invalid [false] - Whether the input has validation errors
+/// @example
+///   .form-control {
+///     @include input-style(text);
+///   }
+///   .form-control.is-invalid {
+///     @include input-style(text, true);
+///   }
+@mixin input-style($type: text, $invalid: false) {
+  font-family: $font-family-base;
+  font-size: map-get($input-text, font-size);
+  font-weight: map-get($input-text, font-weight);
+  line-height: map-get($input-text, line-height);
+  transition: $transition-base;
+  
+  // Base styles for text-like inputs
+  @if $type == 'text' or $type == 'select' {
+    display: block;
+    width: 100%;
+    height: $input-height;
+    padding: $input-padding-y $input-padding-x;
+    color: $input-text;
+    background-color: $input-background;
+    border: $input-border-width solid $input-border;
+    border-radius: $border-radius-md;
+    
+    &::placeholder {
+      color: $input-placeholder;
+      opacity: 1;
+    }
+    
+    &:focus {
+      border-color: $input-focus-border;
+      outline: 0;
+      box-shadow: 0 0 0 3px rgba($input-focus-border, 0.25);
+    }
+    
+    &:disabled, &.disabled {
+      background-color: $input-disabled-background;
+      color: $input-disabled-text;
+      opacity: $disabled-opacity;
+      cursor: not-allowed;
+    }
+    
+    @if $invalid {
+      border-color: $input-error-border;
+      
+      &:focus {
+        border-color: $input-error-border;
+        box-shadow: 0 0 0 3px rgba($input-error-border, 0.25);
+      }
+    }
+  }
+  
+  // Checkbox and radio specific styles
+  @if $type == 'checkbox' or $type == 'radio' {
+    position: relative;
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    margin-right: $spacing-2;
+    vertical-align: middle;
+    appearance: none;
+    border: $input-border-width solid $input-border;
+    background-color: $input-background;
+    cursor: pointer;
+    
+    @if $type == 'checkbox' {
+      border-radius: $border-radius-sm;
+    } @else {
+      border-radius: 50%;
+    }
+    
+    &:checked {
+      background-color: $primary;
+      border-color: $primary;
+      
+      @if $type == 'checkbox' {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: contain;
+      } @else {
+        &::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 0.5em;
+          height: 0.5em;
+          border-radius: 50%;
+          background-color: white;
+        }
+      }
+    }
+    
+    &:focus {
+      outline: 0;
+      box-shadow: 0 0 0 3px rgba($primary, 0.25);
+    }
+    
+    &:disabled, &.disabled {
+      background-color: $input-disabled-background;
+      opacity: $disabled-opacity;
+      cursor: not-allowed;
+    }
+    
+    @if $invalid {
+      border-color: $input-error-border;
+      
+      &:focus {
+        box-shadow: 0 0 0 3px rgba($input-error-border, 0.25);
+      }
+    }
+  }
+}
+
+/// Creates a loading spinner animation
+/// @param {Color} $color [$primary] - Color of the spinner
+/// @param {Number} $size [24px] - Size of the spinner
+/// @param {Number} $thickness [2px] - Thickness of the spinner border
+/// @example
+///   .loader {
+///     @include spinner($primary, 32px, 3px);
+///   }
+@mixin spinner($color: $primary, $size: 24px, $thickness: 2px) {
+  display: inline-block;
+  width: $size;
+  height: $size;
+  border: $thickness solid rgba($color, 0.2);
+  border-top-color: $color;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}
