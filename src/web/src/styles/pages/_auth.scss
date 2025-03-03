@@ -1,0 +1,360 @@
+// =============================================================================
+// AUTHENTICATION PAGE STYLES
+// =============================================================================
+//
+// This file contains styles specific to the authentication-related pages
+// including login and site selection screens. It implements responsive and
+// accessible layouts as specified in the technical requirements.
+//
+// =============================================================================
+
+// Import design system variables and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// COMMON AUTHENTICATION STYLES
+// =============================================================================
+
+.auth-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: $background;
+  position: relative;
+  overflow-x: hidden;
+}
+
+.auth-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(to right bottom, rgba($primary, 0.05), rgba($primary-dark, 0.1));
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.auth-content {
+  @include flex(column, center, center);
+  flex: 1 0 auto;
+  padding: $spacing-4;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  
+  @include respond-to(md) {
+    padding: $spacing-8;
+  }
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 450px;
+  background-color: $surface;
+  border-radius: $border-radius-lg;
+  padding: $spacing-6;
+  @include elevation(3);
+  
+  @include respond-to(sm) {
+    padding: $spacing-8;
+  }
+  
+  // Ensure proper focus outline for keyboard navigation
+  &:focus-within {
+    outline: none;
+    box-shadow: $shadow-lg, 0 0 0 3px rgba($primary, 0.3);
+  }
+}
+
+// =============================================================================
+// LOGIN SCREEN
+// =============================================================================
+
+.login-container {
+  width: 100%;
+  @include flex(column, flex-start, stretch);
+  gap: $spacing-6;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: $spacing-4;
+  
+  .logo {
+    max-width: 120px;
+    margin-bottom: $spacing-4;
+  }
+  
+  h1 {
+    margin-bottom: $spacing-2;
+    color: $text-primary;
+    font-weight: $font-weight-bold;
+  }
+  
+  p {
+    color: $text-secondary;
+    font-size: $font-size-md;
+  }
+}
+
+.form-options {
+  @include flex(row, space-between, center);
+  margin-bottom: $spacing-4;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  
+  @include respond-to(xs) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  @include respond-to(sm) {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+.remember-me {
+  @include flex(row, flex-start, center);
+  gap: $spacing-2;
+  
+  input[type="checkbox"] {
+    margin: 0;
+    
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: 2px;
+    }
+  }
+  
+  label {
+    color: $text-secondary;
+    font-size: $font-size-sm;
+    cursor: pointer;
+  }
+}
+
+.forgot-password {
+  color: $primary;
+  text-decoration: none;
+  font-size: $font-size-sm;
+  transition: $transition-base;
+  
+  &:hover, &:focus {
+    text-decoration: underline;
+    color: $primary-dark;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+    border-radius: $border-radius-sm;
+  }
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: $spacing-8;
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+// Error message styling
+.auth-error {
+  color: $danger;
+  background-color: rgba($danger, 0.1);
+  border-radius: $border-radius-md;
+  padding: $spacing-3;
+  margin-bottom: $spacing-4;
+  font-size: $font-size-sm;
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  
+  &::before {
+    content: "!";
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    background-color: $danger;
+    border-radius: 50%;
+    color: white;
+    font-weight: $font-weight-bold;
+  }
+}
+
+// =============================================================================
+// SITE SELECTION SCREEN
+// =============================================================================
+
+.site-selection-container {
+  width: 100%;
+  @include flex(column, flex-start, stretch);
+  gap: $spacing-6;
+}
+
+.site-selection-header {
+  text-align: center;
+  margin-bottom: $spacing-4;
+  
+  h1 {
+    margin-bottom: $spacing-4;
+    color: $text-primary;
+    font-weight: $font-weight-bold;
+  }
+  
+  p {
+    color: $text-secondary;
+    font-size: $font-size-md;
+  }
+}
+
+.site-list {
+  @include flex(column, flex-start, stretch);
+  gap: $spacing-2;
+  margin-bottom: $spacing-6;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: $spacing-2;
+  
+  // Improve scrollbar styling for better UX
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba($border, 0.5);
+    border-radius: $border-radius-full;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background-color: $secondary-light;
+    border-radius: $border-radius-full;
+  }
+}
+
+.site-option {
+  @include flex(row, flex-start, center);
+  padding: $spacing-3;
+  border-radius: $border-radius-md;
+  border: 1px solid $border;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+    border-color: rgba($primary, 0.2);
+  }
+  
+  &.selected {
+    background-color: rgba($primary, 0.1);
+    border-color: $primary;
+  }
+  
+  input[type="radio"] {
+    margin-right: $spacing-3;
+    
+    &:focus-visible {
+      outline: 2px solid $primary;
+      outline-offset: 2px;
+    }
+  }
+  
+  label {
+    flex: 1;
+    color: $text-primary;
+    font-size: $font-size-md;
+    cursor: pointer;
+  }
+  
+  // Improve keyboard focus handling
+  &:focus-within {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+    background-color: rgba($primary, 0.05);
+  }
+}
+
+.site-selection-actions {
+  @include flex(row, space-between, center);
+  margin-top: $spacing-6;
+  
+  @include respond-to(xs) {
+    flex-direction: column;
+    gap: $spacing-3;
+    
+    button {
+      width: 100%;
+    }
+  }
+  
+  @include respond-to(sm) {
+    flex-direction: row;
+    
+    button {
+      width: auto;
+    }
+  }
+}
+
+// =============================================================================
+// RESPONSIVE ADJUSTMENTS
+// =============================================================================
+
+@include respond-to(xs) {
+  .auth-card {
+    padding: $spacing-4;
+    border-radius: $border-radius-md;
+  }
+  
+  .login-header, .site-selection-header {
+    h1 {
+      font-size: $font-size-xl;
+    }
+    
+    p {
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+@include respond-to(md) {
+  .auth-card {
+    min-width: 400px;
+  }
+}
+
+// =============================================================================
+// ACCESSIBILITY ENHANCEMENTS
+// =============================================================================
+
+// High contrast focus states for keyboard navigation
+button:focus-visible, 
+a:focus-visible, 
+input:focus-visible, 
+select:focus-visible {
+  outline: 2px solid $primary;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba($primary, 0.3);
+}
+
+// Skip to content link for screen readers and keyboard users
+.skip-to-content {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: $primary;
+  color: white;
+  padding: $spacing-2 $spacing-4;
+  z-index: $z-index-tooltip;
+  transition: top 0.2s ease;
+  
+  &:focus {
+    top: 0;
+  }
+}
