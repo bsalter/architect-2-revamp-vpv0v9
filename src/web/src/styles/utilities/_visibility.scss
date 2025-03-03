@@ -1,0 +1,276 @@
+// =============================================================================
+// VISIBILITY UTILITIES
+// =============================================================================
+//
+// Utility classes for controlling element visibility, display properties, and
+// screen-reader accessibility. These utilities support responsive design and
+// help meet WCAG 2.1 AA compliance requirements.
+//
+// =============================================================================
+
+// Import required variables and mixins
+@import "../abstracts/variables";
+@import "../abstracts/mixins";
+
+// =============================================================================
+// BASIC VISIBILITY
+// =============================================================================
+
+// Controls element visibility while maintaining layout
+.visible {
+  visibility: visible;
+}
+
+.invisible {
+  visibility: hidden;
+}
+
+// Completely removes element from layout flow
+.hidden {
+  display: none;
+}
+
+// =============================================================================
+// DISPLAY PROPERTIES
+// =============================================================================
+
+.block {
+  display: block;
+}
+
+.inline {
+  display: inline;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.flex {
+  display: flex;
+}
+
+.inline-flex {
+  display: inline-flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.inline-grid {
+  display: inline-grid;
+}
+
+// =============================================================================
+// SCREEN READER ACCESSIBILITY
+// =============================================================================
+
+// Hides content visually but remains accessible to screen readers
+.sr-only {
+  @include visually-hidden();
+}
+
+// Visually hidden, but becomes visible on focus (for keyboard navigation)
+.sr-only-focusable {
+  @include visually-hidden();
+  
+  &:focus {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip: auto;
+    white-space: normal;
+  }
+}
+
+// =============================================================================
+// OPACITY CONTROL
+// =============================================================================
+
+.opacity-0 {
+  opacity: 0;
+}
+
+.opacity-25 {
+  opacity: 0.25;
+}
+
+.opacity-50 {
+  opacity: 0.5;
+}
+
+.opacity-75 {
+  opacity: 0.75;
+}
+
+.opacity-100 {
+  opacity: 1;
+}
+
+// =============================================================================
+// RESPONSIVE VISIBILITY
+// =============================================================================
+
+// Shows element only on specified breakpoint
+.show-xs {
+  display: none;
+  
+  @include respond-to(xs) {
+    display: block;
+  }
+}
+
+.show-sm {
+  display: none;
+  
+  @include respond-to(sm) {
+    display: block;
+  }
+}
+
+.show-md {
+  display: none;
+  
+  @include respond-to(md) {
+    display: block;
+  }
+}
+
+.show-lg {
+  display: none;
+  
+  @include respond-to(lg) {
+    display: block;
+  }
+}
+
+.show-xl {
+  display: none;
+  
+  @include respond-to(xl) {
+    display: block;
+  }
+}
+
+// Hides element only on specified breakpoint
+.hide-xs {
+  @include respond-to(xs) {
+    display: none;
+  }
+}
+
+.hide-sm {
+  @include respond-to(sm) {
+    display: none;
+  }
+}
+
+.hide-md {
+  @include respond-to(md) {
+    display: none;
+  }
+}
+
+.hide-lg {
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+.hide-xl {
+  @include respond-to(xl) {
+    display: none;
+  }
+}
+
+// =============================================================================
+// RESPONSIVE VISIBILITY UP (From Breakpoint)
+// =============================================================================
+
+// Shows element on specified breakpoint and up
+.show-xs-up {
+  display: block;
+}
+
+.show-sm-up {
+  display: none;
+  
+  @include respond-to(sm) {
+    display: block;
+  }
+}
+
+.show-md-up {
+  display: none;
+  
+  @include respond-to(md) {
+    display: block;
+  }
+}
+
+.show-lg-up {
+  display: none;
+  
+  @include respond-to(lg) {
+    display: block;
+  }
+}
+
+.show-xl-up {
+  display: none;
+  
+  @include respond-to(xl) {
+    display: block;
+  }
+}
+
+// Hides element on specified breakpoint and up
+.hide-xs-up {
+  display: none;
+}
+
+.hide-sm-up {
+  @include respond-to(sm) {
+    display: none;
+  }
+}
+
+.hide-md-up {
+  @include respond-to(md) {
+    display: none;
+  }
+}
+
+.hide-lg-up {
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+.hide-xl-up {
+  @include respond-to(xl) {
+    display: none;
+  }
+}
+
+// =============================================================================
+// PRINT VISIBILITY
+// =============================================================================
+
+// Shows element only when printing
+.print-only {
+  display: none;
+  
+  @media print {
+    display: block;
+  }
+}
+
+// Hides element when printing
+.no-print {
+  @media print {
+    display: none;
+  }
+}
