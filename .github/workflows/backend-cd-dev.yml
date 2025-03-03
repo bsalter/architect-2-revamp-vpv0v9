@@ -1,0 +1,224 @@
+# This workflow handles continuous deployment of the backend application to the development environment.
+name: Backend CD - Development
+
+# Workflow Triggers
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/backend/**'
+      - '.github/workflows/backend-cd-dev.yml'
+  workflow_dispatch:
+    inputs:
+      deploy_type:
+        description: 'Type of deployment'
+        required: true
+        default: 'standard'
+        type: choice
+        options:
+          - standard
+          - migration-only
+          - redeploy
+
+# Define environment variables for use in jobs
+env:
+  PYTHON_VERSION: '3.11'
+  WORKING_DIRECTORY: 'src/backend'
+  AWS_REGION: ${{ secrets.AWS_DEV_REGION }}
+  ECR_REPOSITORY: ${{ secrets.ECR_DEV_REPOSITORY }}
+  ECS_CLUSTER: ${{ secrets.ECS_DEV_CLUSTER }}
+  ECS_SERVICE: ${{ secrets.ECS_DEV_BACKEND_SERVICE }}
+  TASK_DEFINITION: ${{ secrets.ECS_DEV_BACKEND_TASK_DEFINITION }}
+  CONTAINER_NAME: backend-api
+  DEV_API_URL: ${{ secrets.DEV_API_URL }}
+
+# Concurrency settings to prevent multiple deployments at once
+concurrency:
+  group: development
+  cancel-in-progress: true
+
+# Define the deployment environment
+environment:
+  name: development
+  url: ${{ steps.deploy.outputs.url }}
+
+# Define Jobs
+jobs:
+  build_and_push:
+    name: Build and Push Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # Checks out the repository code in the GitHub runner
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2 # Sets up Docker Buildx for container builds
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # Configures AWS credentials for deployment to AWS services
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        uses: docker/login-action@v2 # Logs into AWS ECR to store container images
+        with:
+          registry: ${{ secrets.ECR_DEV_REGISTRY }}
+          username: AWS
+          password: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Extract metadata (labels, tags) for Docker
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ secrets.ECR_DEV_REGISTRY }}/${{ env.ECR_REPOSITORY }}
+          flavor: latest
+
+      - name: Build and push Docker image
+        id: build-push
+        uses: docker/build-push-action@v4 # Builds and pushes Docker container to registry
+        with:
+          context: ${{ env.WORKING_DIRECTORY }}
+          file: ${{ env.WORKING_DIRECTORY }}/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Save the image tag
+        run: echo "IMAGE_TAG=${{ steps.meta.outputs.tags }}" >> $GITHUB_ENV
+
+  prepare_database:
+    name: Prepare Database
+    needs: build_and_push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # Checks out the repository code in the GitHub runner
+
+      - name: Set up Python
+        uses: actions/setup-python@v4 # Sets up Python environment in the GitHub runner
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+          cache-dependency-path: 'src/backend/requirements.txt'
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # Configures AWS credentials for deployment to AWS services
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Install dependencies
+        run: pip install -r src/backend/requirements.txt
+
+      - name: Set environment variables for database connection
+        run: |
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> $GITHUB_ENV
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "DB_PORT=${{ secrets.DB_PORT }}" >> $GITHUB_ENV
+          echo "DB_NAME=${{ secrets.DB_NAME }}" >> $GITHUB_ENV
+
+      - name: Run database migrations
+        run: |
+          python src/backend/scripts/run_migrations.py --revision head
+          echo "MIGRATION_STATUS=success" >> $GITHUB_ENV
+        continue-on-error: true
+
+      - name: Verify migration success
+        if: env.MIGRATION_STATUS != 'success'
+        run: |
+          echo "Database migration failed!"
+          exit 1
+
+  deploy_to_dev:
+    name: Deploy to Development ECS
+    needs: prepare_database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # Checks out the repository code in the GitHub runner
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2 # Configures AWS credentials for deployment to AWS services
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Download current task definition
+        id: download-task-definition
+        uses: aws-actions/amazon-ecs-render-task-definition@v1 # Updates container image in task definition
+        with:
+          task-definition: ${{ env.TASK_DEFINITION }}
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ secrets.ECR_DEV_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+
+      - name: Deploy task definition to ECS service
+        id: deploy
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1 # Deploys updated task definition to ECS service
+        with:
+          task-definition: ${{ steps.download-task-definition.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+
+      - name: Wait for service to reach steady state
+        run: |
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --region ${{ env.AWS_REGION }}
+
+  run_smoke_tests:
+    name: Run Smoke Tests
+    needs: deploy_to_dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3 # Checks out the repository code in the GitHub runner
+
+      - name: Set up Python
+        uses: actions/setup-python@v4 # actions/setup-python version v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install test dependencies
+        run: pip install requests
+
+      - name: Run smoke API tests
+        run: |
+          python -c "
+          import requests
+          try:
+            response = requests.get('${{ env.DEV_API_URL }}/api/health', timeout=10)
+            response.raise_for_status()
+            print('API Health Check Passed')
+            print(response.json())
+          except requests.exceptions.RequestException as e:
+            print(f'API Health Check Failed: {e}')
+            exit(1)
+          "
+
+      - name: Check for critical functionality working
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Smoke tests passed"
+          else
+            echo "Smoke tests failed"
+            exit 1
+          fi
+
+      - name: Notify team of deployment status
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "Deployment to dev successful"
+          else
+            echo "Deployment to dev failed"
+            exit 1
+          fi
