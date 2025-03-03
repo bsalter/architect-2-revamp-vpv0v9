@@ -1,0 +1,14 @@
+<nav class="breadcrumb-nav" attr.aria-label="Breadcrumb navigation">
+  <ol class="breadcrumb-list" *ngIf="breadcrumbService.breadcrumbs$ | async as breadcrumbs">
+    <li class="breadcrumb-item" *ngIf="showHome">
+      <a class="breadcrumb-link" href="/" (click)="navigateTo('/', $event)">Home</a>
+      <span class="breadcrumb-separator">/</span>
+    </li>
+    <li class="breadcrumb-item" *ngFor="let breadcrumb of breadcrumbs; let last = last" [class.active]="last">
+      <a class="breadcrumb-link" *ngIf="!last" href="{{breadcrumb.url}}" (click)="navigateTo(breadcrumb.url, $event)">{{breadcrumb.label}}</a>
+      <span class="breadcrumb-text" *ngIf="last">{{breadcrumb.label}}</span>
+      <span class="breadcrumb-separator" *ngIf="!last">/</span>
+    </li>
+  </ol>
+  <div class="breadcrumb-empty" *ngIf="(breadcrumbService.breadcrumbs$ | async)?.length === 0"></div>
+</nav>
