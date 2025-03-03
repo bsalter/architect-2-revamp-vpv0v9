@@ -1,0 +1,251 @@
+// =============================================================================
+// HEADER COMPONENT STYLES
+// =============================================================================
+//
+// This file contains styling for the application header component that appears
+// across all authenticated pages. It provides consistent branding, navigation,
+// and user controls including site selection functionality.
+//
+// =============================================================================
+
+// Import design tokens and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// =============================================================================
+// HEADER CONTAINER
+// =============================================================================
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: $surface;
+  border-bottom: 1px solid $border;
+  z-index: $z-index-fixed;
+  @include elevation(2);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: $spacing-3 $spacing-4;
+  @include flex(row, space-between, center, nowrap);
+  
+  @include respond-to(md) {
+    padding: $spacing-4 $spacing-6;
+  }
+}
+
+// =============================================================================
+// LOGO AND BRANDING
+// =============================================================================
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  
+  img {
+    height: 32px;
+    
+    @include respond-to(md) {
+      height: 40px;
+    }
+  }
+}
+
+// =============================================================================
+// NAVIGATION
+// =============================================================================
+
+.navigation-container {
+  @include flex(row, flex-start, center, nowrap);
+  margin-left: $spacing-6;
+  flex-grow: 1;
+  
+  @include respond-to(md) {
+    margin-left: $spacing-6;
+  }
+  
+  // Hide on mobile, show on desktop
+  display: none;
+  
+  @include respond-to(lg) {
+    display: flex;
+  }
+}
+
+// =============================================================================
+// USER INFORMATION
+// =============================================================================
+
+.user-container {
+  @include flex(row, flex-end, center, nowrap);
+  gap: $spacing-3;
+}
+
+.username {
+  display: none;
+  font-weight: 500;
+  margin-right: $spacing-3;
+  
+  @include respond-to(md) {
+    display: block;
+  }
+}
+
+// =============================================================================
+// SITE SELECTOR
+// =============================================================================
+
+.site-selector {
+  position: relative;
+  padding: $spacing-2 $spacing-3;
+  background-color: rgba($primary, 0.1);
+  border-radius: 4px;
+  color: $primary;
+  cursor: pointer;
+  @include flex(row, center, center, nowrap);
+  gap: $spacing-2;
+  
+  &:hover {
+    background-color: rgba($primary, 0.15);
+  }
+  
+  @include focus-visible();
+}
+
+.current-site {
+  font-weight: 500;
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  @include respond-to(md) {
+    max-width: 200px;
+  }
+}
+
+.site-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 240px;
+  max-height: 300px;
+  overflow-y: auto;
+  background-color: $surface;
+  border: 1px solid $border;
+  border-radius: 4px;
+  margin-top: $spacing-2;
+  padding: $spacing-2 0;
+  z-index: $z-index-dropdown;
+  @include elevation(3);
+  transform-origin: top right;
+  animation: dropdown-appear 0.2s ease-out;
+}
+
+.site-option {
+  padding: $spacing-2 $spacing-3;
+  cursor: pointer;
+  
+  &:hover {
+    background-color: rgba($primary, 0.05);
+  }
+  
+  &.active {
+    background-color: rgba($primary, 0.1);
+    color: $primary;
+  }
+  
+  @include focus-visible();
+}
+
+// =============================================================================
+// LOGIN/LOGOUT BUTTONS
+// =============================================================================
+
+.login-button,
+.logout-button {
+  padding: $spacing-2 $spacing-3;
+  border-radius: 4px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  @include focus-visible();
+}
+
+.login-button {
+  background-color: $primary;
+  color: white;
+  
+  &:hover {
+    background-color: darken($primary, 5%);
+  }
+}
+
+.logout-button {
+  background-color: transparent;
+  color: $text-primary;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+}
+
+// =============================================================================
+// MOBILE MENU
+// =============================================================================
+
+.mobile-menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  
+  @include respond-to(lg) {
+    display: none;
+  }
+  
+  @include focus-visible();
+}
+
+.mobile-menu {
+  position: fixed;
+  top: 60px; // Height of header
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 60px);
+  background-color: $surface;
+  z-index: $z-index-fixed - 1;
+  padding: $spacing-4;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  
+  &.active {
+    transform: translateX(0);
+  }
+  
+  @include respond-to(lg) {
+    display: none;
+  }
+}
+
+// =============================================================================
+// ANIMATIONS
+// =============================================================================
+
+@keyframes dropdown-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
