@@ -1,0 +1,30 @@
+{
+  "interaction": {
+    "id": 3,
+    "siteId": 2,
+    "siteName": "Northwest Regional Office",
+    "title": "Project Update Meeting",
+    "type": "MEETING",
+    "lead": "John Smith",
+    "startDatetime": "2023-06-18T09:15:00.000Z",
+    "endDatetime": "2023-06-18T10:15:00.000Z",
+    "timezone": "America/New_York",
+    "location": "East Wing Room 305",
+    "description": "Weekly project status update with development team",
+    "notes": "Review sprint progress and upcoming milestones",
+    "createdBy": 1,
+    "creatorName": "jsmith",
+    "createdAt": "2023-06-10T16:45:00.000Z",
+    "updatedAt": "2023-06-10T16:45:00.000Z",
+    "durationMinutes": 60,
+    "site": {
+      "id": 2,
+      "name": "Northwest Regional Office"
+    },
+    "creator": {
+      "id": 1,
+      "username": "jsmith",
+      "email": "jsmith@example.com"
+    }
+  }
+}
