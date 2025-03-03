@@ -1,0 +1,52 @@
+<div class="date-time-picker-container">
+  <label class="date-time-label" for="{{id}}" *ngIf="label">
+    {{label}} <span class="date-time-required" *ngIf="required">*</span>
+  </label>
+  <div class="date-time-inputs">
+    <div class="date-input-group">
+      <input 
+        type="date" 
+        id="{{id}}-date" 
+        name="{{name}}-date"
+        [formControl]="dateControl"
+        [placeholder]="placeholder || 'Select date'"
+        [required]="required"
+        [min]="minDate | dateFormat:'INPUT_DATE'"
+        [max]="maxDate | dateFormat:'INPUT_DATE'"
+        [disabled]="disabled"
+        [ngClass]="{'is-invalid': error && touched}"
+        (change)="onDateChange($event.target.value)"
+        (blur)="markAsTouched()">
+    </div>
+    <div class="time-input-group">
+      <input 
+        type="time" 
+        id="{{id}}-time" 
+        name="{{name}}-time"
+        [formControl]="timeControl"
+        [placeholder]="'Select time'"
+        [required]="required"
+        [disabled]="disabled"
+        [ngClass]="{'is-invalid': error && touched}"
+        (change)="onTimeChange($event.target.value)"
+        (blur)="markAsTouched()">
+    </div>
+    <div class="timezone-select-group" *ngIf="showTimezone">
+      <select 
+        id="{{id}}-timezone" 
+        name="{{name}}-timezone"
+        [formControl]="timezoneControl"
+        [required]="required"
+        [disabled]="disabled"
+        [ngClass]="{'is-invalid': error && touched}"
+        (change)="onTimezoneChange($event.target.value)"
+        (blur)="markAsTouched()">
+        <option value="" disabled="true">Select timezone</option>
+        <option *ngFor="let tz of availableTimezones" [value]="tz">{{ tz | timezone }}</option>
+      </select>
+    </div>
+  </div>
+  <div class="date-time-error" *ngIf="error && touched">
+    {{error}}
+  </div>
+</div>
