@@ -1,0 +1,75 @@
+// Import variables and mixins
+@import '../../../styles/abstracts/variables';
+@import '../../../styles/abstracts/mixins';
+
+// Error message container
+.error-message-container {
+  margin-top: $spacing-2;
+  width: 100%;
+}
+
+// Base error message styling
+.error-message {
+  @include flex(row, flex-start, flex-start);
+  border-radius: $border-radius-md;
+  font-weight: $font-weight-medium;
+  line-height: $line-height-snug;
+  
+  // Styles for all screens (using xs breakpoint which is 0)
+  @include respond-to(xs) {
+    padding: $spacing-1 $spacing-2;
+    font-size: $font-size-xs;
+  }
+  
+  // Override for md breakpoint and above
+  @include respond-to(md) {
+    padding: $spacing-2 $spacing-3;
+    font-size: $font-size-sm;
+  }
+}
+
+// Validation error styling
+.error-message-validation {
+  background-color: rgba($danger, 0.05);
+  border-left: 3px solid $danger;
+  color: $danger-dark;
+}
+
+// Warning message styling
+.error-message-warning {
+  background-color: rgba($warning, 0.05);
+  border-left: 3px solid $warning;
+  color: $warning-dark;
+}
+
+// System error styling
+.error-message-system {
+  background-color: rgba($danger, 0.1);
+  border-left: 3px solid $danger-dark;
+  color: $danger-dark;
+}
+
+// Error icon styling
+.error-icon {
+  @include flex(row, center, center);
+  margin-right: $spacing-2;
+  
+  // Styles for all screens (using xs breakpoint which is 0)
+  @include respond-to(xs) {
+    width: 16px;
+    height: 16px;
+    font-size: $font-size-sm;
+  }
+  
+  // Override for md breakpoint and above
+  @include respond-to(md) {
+    width: 20px;
+    height: 20px;
+    font-size: $font-size-md;
+  }
+}
+
+// Error text styling
+.error-text {
+  flex: 1;
+}
