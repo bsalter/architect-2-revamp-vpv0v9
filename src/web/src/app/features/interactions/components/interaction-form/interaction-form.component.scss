@@ -1,0 +1,99 @@
+@import "../../../../../styles/abstracts/_variables";
+@import "../../../../../styles/abstracts/_mixins";
+
+.interaction-form {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: $spacing-4;
+  background-color: $surface;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-md;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-4;
+}
+
+.form-header {
+  margin-bottom: $spacing-4;
+  border-bottom: 1px solid $border;
+  padding-bottom: $spacing-3;
+}
+
+.date-time-section {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-3;
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: $spacing-6;
+  flex-wrap: wrap;
+  gap: $spacing-3;
+}
+
+.form-actions {
+  display: flex;
+  gap: $spacing-3;
+}
+
+.required-note {
+  font-size: $font-size-sm;
+  color: $text-secondary;
+}
+
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: $z-index-modal;
+  border-radius: $border-radius-lg;
+}
+
+@media (min-width: $breakpoint-md) {
+  .date-time-section {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: $spacing-3;
+  }
+}
+
+@media (max-width: $breakpoint-sm) {
+  .form-footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+  
+  .form-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+  
+  .form-actions .btn {
+    width: 100%;
+  }
+  
+  .required-note {
+    margin-top: $spacing-2;
+    text-align: center;
+  }
+}
+
+textarea.form-control {
+  min-height: 100px;
+}
+
+.form-group:has(.is-invalid) {
+  margin-bottom: $spacing-6;
+}
