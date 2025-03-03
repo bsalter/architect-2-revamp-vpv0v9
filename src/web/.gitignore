@@ -1,0 +1,51 @@
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# Angular cache
+/.angular/cache
+.sass-cache/
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Testing
+/coverage
+/.nyc_output
+
+# Cypress test artifacts
+/cypress/videos/
+/cypress/screenshots/
+
+# Environment files
+src/environments/*.local.ts
+.env
+*.env.local
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Miscellaneous
+/.sass-cache
+/connect.lock
+/libpeerconnection.log
+testem.log
+/typings
