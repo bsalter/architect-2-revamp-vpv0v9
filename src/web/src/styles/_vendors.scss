@@ -1,0 +1,11 @@
+// This file orchestrates vendor styling imports in the correct order to prevent conflicts
+
+// Order is important to ensure proper cascade and prevent style conflicts
+// Tailwind must be imported before component-specific vendor styles
+@import 'vendors/tailwind';
+@import 'vendors/ag-grid';
+
+.vendor-style-overrides {
+  /* Add any global vendor style overrides here */
+  /* This ensures all overrides are centralized for easier maintenance */
+}
