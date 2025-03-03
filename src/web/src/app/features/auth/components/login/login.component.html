@@ -1,0 +1,87 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <img src="assets/images/logo-full.svg" alt="Interaction Management System Logo" class="logo">
+      <h1>Interaction Management</h1>
+      <p>Please sign in to continue</p>
+    </div>
+
+    <form [formGroup]="authPageService.loginForm" (ngSubmit)="authPageService.handleLoginSubmit() | async">
+      <!-- Username field -->
+      <div class="form-group">
+        <label for="username" required>Username</label>
+        <input 
+          type="email" 
+          id="username" 
+          formControlName="username" 
+          autocomplete="username" 
+          class="form-control" 
+          [ngClass]="{'is-invalid': authPageService.getFormControlErrors('username').length > 0}"
+          placeholder="Enter your email"
+          aria-required="true">
+        <app-error-message 
+          *ngFor="let error of authPageService.getFormControlErrors('username')"
+          [message]="error"
+          type="validation">
+        </app-error-message>
+      </div>
+
+      <!-- Password field -->
+      <div class="form-group">
+        <label for="password" required>Password</label>
+        <input 
+          type="password" 
+          id="password" 
+          formControlName="password" 
+          autocomplete="current-password" 
+          class="form-control" 
+          [ngClass]="{'is-invalid': authPageService.getFormControlErrors('password').length > 0}"
+          placeholder="Enter your password"
+          aria-required="true">
+        <app-error-message 
+          *ngFor="let error of authPageService.getFormControlErrors('password')"
+          [message]="error"
+          type="validation">
+        </app-error-message>
+      </div>
+
+      <!-- Form options -->
+      <div class="form-options">
+        <div class="remember-me">
+          <input type="checkbox" id="remember-me" checked>
+          <label for="remember-me">Remember me</label>
+        </div>
+        <a href="javascript:void(0)" class="forgot-password" (click)="authPageService.handleForgotPassword()">
+          Forgot Password?
+        </a>
+      </div>
+
+      <!-- Authentication error message -->
+      <app-error-message 
+        *ngIf="authPageService.authError$ | async"
+        [message]="authPageService.authError$ | async"
+        type="system">
+      </app-error-message>
+
+      <!-- Submit button -->
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block" 
+        [disabled]="authPageService.isSubmitting$ | async || authPageService.loginForm.invalid">
+        Sign In
+      </button>
+
+      <!-- Loading indicator -->
+      <app-loading-indicator 
+        *ngIf="authPageService.isSubmitting$ | async"
+        [show]="true"
+        text="Signing in...">
+      </app-loading-indicator>
+    </form>
+
+    <!-- Version information -->
+    <div class="version-info">
+      <p>© 2023 Interaction Management System</p>
+    </div>
+  </div>
+</div>
