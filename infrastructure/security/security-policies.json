@@ -1,0 +1,350 @@
+{
+  "aws_iam_policies": {
+    "ec2_instance_policy": {
+      "description": "IAM policy template for EC2 instances running application components",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "cloudwatch:PutMetricData",
+              "cloudwatch:GetMetricData",
+              "cloudwatch:GetMetricStatistics"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents",
+              "logs:DescribeLogStreams"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ssm:GetParameter",
+              "ssm:GetParameters",
+              "ssm:GetParametersByPath"
+            ],
+            "Resource": "arn:aws:ssm:*:*:parameter/${project_name}/${environment}/*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt"
+            ],
+            "Resource": "${kms_key_arn}"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${static_bucket_name}",
+              "arn:aws:s3:::${static_bucket_name}/*"
+            ]
+          }
+        ]
+      }
+    },
+    "ecs_task_execution_policy": {
+      "description": "IAM policy template for ECS task execution with permissions for ECR, CloudWatch Logs, SSM, and Secrets Manager",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ecr:GetAuthorizationToken",
+              "ecr:BatchCheckLayerAvailability",
+              "ecr:GetDownloadUrlForLayer",
+              "ecr:BatchGetImage"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ssm:GetParameters",
+              "ssm:GetParameter",
+              "ssm:GetParametersByPath"
+            ],
+            "Resource": "arn:aws:ssm:*:*:parameter/${project_name}/${environment}/*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt"
+            ],
+            "Resource": "${kms_key_arn}"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "secretsmanager:GetSecretValue"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:*:secret:${project_name}/${environment}/*"
+          }
+        ]
+      }
+    },
+    "ecs_task_policy": {
+      "description": "IAM policy template for ECS tasks with permissions for S3, SQS, SES, and Redis",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "s3:GetObject",
+              "s3:PutObject",
+              "s3:ListBucket"
+            ],
+            "Resource": [
+              "arn:aws:s3:::${app_bucket_name}",
+              "arn:aws:s3:::${app_bucket_name}/*"
+            ]
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "sqs:SendMessage",
+              "sqs:ReceiveMessage",
+              "sqs:DeleteMessage",
+              "sqs:GetQueueAttributes"
+            ],
+            "Resource": "arn:aws:sqs:*:*:${project_name}-${environment}-*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "ses:SendEmail",
+              "ses:SendRawEmail"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "elasticache:DescribeCacheClusters",
+              "elasticache:DescribeReplicationGroups"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "kms:Decrypt",
+              "kms:Encrypt",
+              "kms:GenerateDataKey"
+            ],
+            "Resource": "${kms_key_arn}"
+          }
+        ]
+      }
+    },
+    "cloudwatch_logs_policy": {
+      "description": "IAM policy template for CloudWatch Logs with permissions for log management and KMS encryption",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Allow",
+            "Action": [
+              "logs:CreateLogGroup",
+              "logs:CreateLogStream",
+              "logs:PutLogEvents",
+              "logs:DescribeLogGroups",
+              "logs:DescribeLogStreams",
+              "logs:PutRetentionPolicy",
+              "logs:PutMetricFilter",
+              "logs:GetLogEvents"
+            ],
+            "Resource": "arn:aws:logs:*:*:*"
+          },
+          {
+            "Effect": "Allow",
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*",
+              "kms:DescribeKey"
+            ],
+            "Resource": "${kms_key_arn}"
+          }
+        ]
+      }
+    }
+  },
+  "kms_key_policies": {
+    "database_encryption_key_policy": {
+      "description": "KMS key policy for database encryption ensuring proper access control",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::${account_id}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+          },
+          {
+            "Sid": "Allow RDS Service",
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "rds.amazonaws.com"
+            },
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*",
+              "kms:DescribeKey"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "StringEquals": {
+                "aws:SourceAccount": "${account_id}"
+              }
+            }
+          },
+          {
+            "Sid": "Allow Application Access",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": [
+                "${app_role_arn}"
+              ]
+            },
+            "Action": [
+              "kms:Decrypt"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    },
+    "cloudwatch_encryption_key_policy": {
+      "description": "KMS key policy for CloudWatch logs encryption with appropriate service access",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::${account_id}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+          },
+          {
+            "Sid": "Allow CloudWatch Service",
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "logs.${region}.amazonaws.com"
+            },
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*",
+              "kms:DescribeKey"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "StringEquals": {
+                "aws:SourceAccount": "${account_id}"
+              }
+            }
+          },
+          {
+            "Sid": "Allow Application Access",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": [
+                "${app_role_arn}"
+              ]
+            },
+            "Action": [
+              "kms:Decrypt"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    },
+    "s3_encryption_key_policy": {
+      "description": "KMS key policy for S3 bucket encryption with service and application access",
+      "policy_document": {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Sid": "Enable IAM User Permissions",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": "arn:aws:iam::${account_id}:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+          },
+          {
+            "Sid": "Allow S3 Service",
+            "Effect": "Allow",
+            "Principal": {
+              "Service": "s3.amazonaws.com"
+            },
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:ReEncrypt*",
+              "kms:GenerateDataKey*",
+              "kms:DescribeKey"
+            ],
+            "Resource": "*",
+            "Condition": {
+              "StringEquals": {
+                "aws:SourceAccount": "${account_id}"
+              }
+            }
+          },
+          {
+            "Sid": "Allow Application Access",
+            "Effect": "Allow",
+            "Principal": {
+              "AWS": [
+                "${app_role_arn}"
+              ]
+            },
+            "Action": [
+              "kms:Encrypt",
+              "kms:Decrypt",
+              "kms:GenerateDataKey*"
+            ],
+            "Resource": "*"
+          }
+        ]
+      }
+    }
+  }
+}
