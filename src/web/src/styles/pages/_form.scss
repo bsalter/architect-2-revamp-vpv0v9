@@ -1,0 +1,149 @@
+// =============================================================================
+// FORM PAGE STYLES
+// =============================================================================
+//
+// This file contains page-level styles for the Interaction form pages,
+// including create and edit interfaces. It focuses on the overall page
+// structure and layout, while component-specific styling is handled
+// in separate component SCSS files.
+//
+// =============================================================================
+
+// Import variables and mixins
+@import '../abstracts/variables';
+@import '../abstracts/mixins';
+
+// Main container for form pages
+.page-form {
+  width: 100%;
+  min-height: calc(100vh - 64px - 48px); // Account for header and footer
+  padding: $spacing-4 $spacing-3;
+  background-color: $background;
+
+  // Responsive adjustments for mobile
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-3;
+    min-height: calc(100vh - 56px - 48px); // Adjusted for smaller mobile header
+  }
+}
+
+// Container that centers and constrains form content width
+.form-page-container {
+  max-width: 960px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+// Header section for form pages with title and navigation
+.form-page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-5;
+  flex-wrap: wrap;
+
+  // Responsive adjustments for mobile
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: $spacing-3;
+
+    // Center title on small screens
+    .form-page-title {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
+
+// Page title styling
+.form-page-title {
+  font-size: $font-size-lg;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+  margin: 0;
+}
+
+// Back navigation link styling
+.form-back-link {
+  display: inline-flex;
+  align-items: center;
+  color: $primary;
+  text-decoration: none;
+  padding: $spacing-3;
+  margin-left: -$spacing-3;
+  border-radius: $border-radius-md;
+  transition: all 0.2s ease-in-out;
+
+  // Icon styling for back arrow
+  i, svg {
+    margin-right: $spacing-2;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+
+  // Hover and active states
+  &:hover, &:active {
+    color: darken($primary, 10%);
+    background-color: rgba($primary, 0.05);
+    text-decoration: none;
+  }
+
+  // Focus state for keyboard navigation
+  &:focus-visible {
+    @include focus-visible;
+    text-decoration: none;
+  }
+
+  // Responsive adjustments for mobile
+  @media (max-width: $breakpoint-sm) {
+    margin-left: 0;
+    padding: $spacing-2;
+    align-self: flex-start;
+  }
+}
+
+// Main content area for the form
+.form-content {
+  width: 100%;
+  position: relative;
+}
+
+// Card container for the form
+.form-card {
+  background-color: $surface;
+  border-radius: $border-radius-md;
+  box-shadow: $shadow-md;
+  border: 1px solid $border;
+  width: 100%;
+  padding: $spacing-6;
+  
+  // Responsive padding adjustment
+  @media (max-width: $breakpoint-md) {
+    padding: $spacing-5;
+  }
+  
+  @media (max-width: $breakpoint-sm) {
+    padding: $spacing-4;
+  }
+}
+
+// Additional specific styles for form actions section (bottom buttons)
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-4;
+  margin-top: $spacing-8;
+  
+  // Stack buttons vertically on smallest screens
+  @media (max-width: $breakpoint-sm) {
+    flex-direction: column-reverse;
+    width: 100%;
+    
+    button, a {
+      width: 100%;
+    }
+  }
+}
