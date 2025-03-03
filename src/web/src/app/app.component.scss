@@ -1,0 +1,63 @@
+@import '../../styles/abstracts/variables';
+@import '../../styles/abstracts/mixins';
+
+// Host element styling - ensure the component takes full width and height
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+// Main application container
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: $background;
+}
+
+// Primary content area
+.main-content {
+  flex: 1;
+  padding: $spacing-4;
+  margin-top: 60px; // Space for fixed header
+  width: 100%;
+  max-width: 1200px; // Content width constraint
+  margin-left: auto;
+  margin-right: auto;
+  
+  @include respond-to(md) {
+    padding: $spacing-6; // Larger padding on medium screens
+  }
+  
+  @include respond-to(lg) {
+    margin-top: 64px; // Adjust for taller header on larger screens
+  }
+}
+
+// Fullscreen loading overlay
+.fullscreen-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba($surface, 0.9);
+  z-index: 9999;
+}
+
+// Individual content container sections
+.content-container {
+  background-color: $surface;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: $spacing-4;
+  margin-bottom: $spacing-4;
+  
+  @include respond-to(md) {
+    padding: $spacing-6; // Larger padding on medium screens
+  }
+}
