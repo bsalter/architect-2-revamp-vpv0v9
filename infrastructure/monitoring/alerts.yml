@@ -1,0 +1,345 @@
+---
+# CloudWatch Alerts Configuration for Interaction Management System
+# This file defines alert thresholds, notification channels, and routing rules
+# for the system monitoring infrastructure.
+
+# Global configuration
+global_config:
+  version: 1.0.0  # Current configuration version
+  region: ${AWS_REGION}
+  account_id: ${AWS_ACCOUNT_ID}
+  environment: ${ENVIRONMENT}
+
+# Notification channels configuration
+notification_channels:
+  # PagerDuty integration for critical alerts
+  - name: pagerduty
+    type: PagerDuty
+    integration_key: ${PAGERDUTY_INTEGRATION_KEY}
+    severity_mapping:
+      critical: P1
+      warning: P3
+      info: P5
+
+  # Email notifications for different teams
+  - name: email
+    type: Email
+    recipients:
+      operations: ops-team@example.com
+      development: dev-team@example.com
+      security: security-team@example.com
+      database: db-team@example.com
+
+  # Slack channel notifications
+  - name: slack
+    type: Slack
+    webhook_url: ${SLACK_WEBHOOK_URL}
+    channels:
+      alerts: '#alerts'
+      incidents: '#incidents'
+      performance: '#performance'
+
+# Alert definitions
+alert_definitions:
+  # Web Server CPU utilization alerts
+  - name: web_server_cpu
+    description: Web Server CPU utilization alerts
+    resource_type: EC2
+    metric_name: CPUUtilization
+    namespace: AWS/EC2
+    dimensions:
+      - name: AutoScalingGroupName
+        value: ${WEB_ASG_NAME}
+    thresholds:
+      - severity: warning
+        comparison: GreaterThanThreshold
+        value: 70
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:performance
+          - email:operations
+      - severity: critical
+        comparison: GreaterThanThreshold
+        value: 85
+        evaluation_periods: 2
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:operations
+    annotations:
+      sla_target: <80% avg
+      runbook_url: https://wiki.example.com/runbooks/high-cpu
+
+  # API Server response time alerts
+  - name: api_response_time
+    description: API Server response time alerts
+    resource_type: API Gateway
+    metric_name: Latency
+    namespace: AWS/ApiGateway
+    dimensions:
+      - name: ApiName
+        value: ${API_NAME}
+    thresholds:
+      - severity: warning
+        comparison: GreaterThanThreshold
+        value: 500
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: p95
+        actions:
+          - slack:performance
+          - email:development
+      - severity: critical
+        comparison: GreaterThanThreshold
+        value: 2000
+        evaluation_periods: 2
+        period_seconds: 60
+        statistic: p95
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:development
+    annotations:
+      sla_target: 95% <1s
+      runbook_url: https://wiki.example.com/runbooks/api-latency
+
+  # API Server error rate alerts
+  - name: api_error_rate
+    description: API Server error rate alerts
+    resource_type: API Gateway
+    metric_name: 5XXError
+    namespace: AWS/ApiGateway
+    dimensions:
+      - name: ApiName
+        value: ${API_NAME}
+    thresholds:
+      - severity: warning
+        comparison: GreaterThanThreshold
+        value: 0.01
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:alerts
+          - email:development
+      - severity: critical
+        comparison: GreaterThanThreshold
+        value: 0.05
+        evaluation_periods: 2
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:development
+    annotations:
+      sla_target: <0.5%
+      runbook_url: https://wiki.example.com/runbooks/api-errors
+
+  # Database query time alerts
+  - name: database_query_time
+    description: Database query time alerts
+    resource_type: RDS
+    metric_name: ReadLatency
+    namespace: AWS/RDS
+    dimensions:
+      - name: DBInstanceIdentifier
+        value: ${DB_INSTANCE_ID}
+    thresholds:
+      - severity: warning
+        comparison: GreaterThanThreshold
+        value: 0.3
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:performance
+          - email:database
+      - severity: critical
+        comparison: GreaterThanThreshold
+        value: 1.0
+        evaluation_periods: 2
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:database
+    annotations:
+      sla_target: 95% <500ms
+      runbook_url: https://wiki.example.com/runbooks/db-latency
+
+  # Database connection pool alerts
+  - name: database_connection_pool
+    description: Database connection pool alerts
+    resource_type: RDS
+    metric_name: DatabaseConnections
+    namespace: AWS/RDS
+    dimensions:
+      - name: DBInstanceIdentifier
+        value: ${DB_INSTANCE_ID}
+    thresholds:
+      - severity: warning
+        comparison: GreaterThanThreshold
+        value: ${DB_CONNECTION_THRESHOLD_WARNING}
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:performance
+          - email:database
+      - severity: critical
+        comparison: GreaterThanThreshold
+        value: ${DB_CONNECTION_THRESHOLD_CRITICAL}
+        evaluation_periods: 2
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:database
+    annotations:
+      sla_target: <80%
+      runbook_url: https://wiki.example.com/runbooks/db-connections
+
+  # Cache hit ratio alerts
+  - name: cache_hit_ratio
+    description: Cache hit ratio alerts
+    resource_type: ElastiCache
+    metric_name: CacheHitRate
+    namespace: AWS/ElastiCache
+    dimensions:
+      - name: CacheClusterId
+        value: ${CACHE_CLUSTER_ID}
+    thresholds:
+      - severity: warning
+        comparison: LessThanThreshold
+        value: 0.8
+        evaluation_periods: 15
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:performance
+          - email:development
+      - severity: critical
+        comparison: LessThanThreshold
+        value: 0.6
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:incidents
+          - email:development
+    annotations:
+      sla_target: >85%
+      runbook_url: https://wiki.example.com/runbooks/cache-hit-ratio
+
+  # Auth Service response time alerts
+  - name: auth_service_response_time
+    description: Auth Service response time alerts
+    resource_type: Custom
+    metric_name: AuthLatency
+    namespace: InteractionSystem/Auth
+    dimensions: []
+    thresholds:
+      - severity: warning
+        comparison: GreaterThanThreshold
+        value: 500
+        evaluation_periods: 5
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - slack:performance
+          - email:security
+      - severity: critical
+        comparison: GreaterThanThreshold
+        value: 2000
+        evaluation_periods: 2
+        period_seconds: 60
+        statistic: Average
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:security
+    annotations:
+      sla_target: 99% <1s
+      runbook_url: https://wiki.example.com/runbooks/auth-service
+
+  # Overall system availability alerts
+  - name: system_availability
+    description: Overall system availability alerts
+    resource_type: CloudWatch
+    metric_name: HealthCheckStatus
+    namespace: AWS/Route53
+    dimensions:
+      - name: HealthCheckId
+        value: ${HEALTH_CHECK_ID}
+    thresholds:
+      - severity: warning
+        comparison: LessThanThreshold
+        value: 0.9995
+        evaluation_periods: 6
+        period_seconds: 600
+        statistic: Average
+        actions:
+          - slack:alerts
+          - email:operations
+      - severity: critical
+        comparison: LessThanThreshold
+        value: 0.999
+        evaluation_periods: 3
+        period_seconds: 600
+        statistic: Average
+        actions:
+          - pagerduty
+          - slack:incidents
+          - email:operations
+    annotations:
+      sla_target: 99.9%
+      runbook_url: https://wiki.example.com/runbooks/system-availability
+
+# Composite alerts for combined conditions
+composite_alerts:
+  - name: critical_system_state
+    description: Alert when multiple critical components are failing
+    operator: OR
+    alerts:
+      - system_availability
+      - api_response_time
+      - api_error_rate
+      - web_server_cpu
+    severity: critical
+    actions:
+      - pagerduty
+      - slack:incidents
+      - email:operations
+    annotations:
+      summary: Critical system state detected
+      description: Multiple critical components are failing simultaneously
+      runbook_url: https://wiki.example.com/runbooks/critical-system-state
+
+# Escalation policies
+escalation_policies:
+  # Standard escalation policy
+  - name: standard_escalation
+    steps:
+      - notify: [primary_on_call]
+        delay_minutes: 15
+      - notify: [secondary_on_call]
+        delay_minutes: 15
+      - notify: [engineering_manager]
+        delay_minutes: 30
+
+  # Urgent escalation policy for critical issues
+  - name: urgent_escalation
+    steps:
+      - notify: [primary_on_call, secondary_on_call]
+        delay_minutes: 5
+      - notify: [engineering_manager]
+        delay_minutes: 10
+      - notify: [cto]
+        delay_minutes: 30
