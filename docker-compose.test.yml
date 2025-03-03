@@ -1,0 +1,114 @@
+version: "3.8"
+
+services:
+  backend_test:
+    description: Flask API backend service configured for running backend tests
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+      args:
+        APP_ENV: testing
+    environment:
+      FLASK_APP: app.py
+      FLASK_ENV: testing
+      TESTING: "True"
+      DEBUG: "True"
+      LOG_LEVEL: DEBUG
+      DATABASE_URL: postgresql://postgres:postgres@db_test:5432/interaction_test_db
+      REDIS_URL: redis://cache_test:6379/0
+      AUTH0_DOMAIN: test.auth0.com
+      AUTH0_API_AUDIENCE: test-api
+      AUTH0_ISSUER: https://test.auth0.com/
+      CORS_ALLOWED_ORIGINS: http://localhost:4200
+      PYTHONPATH: /app
+    volumes:
+      - ./src/backend:/app
+      - ./src/backend/tests:/app/tests
+    command: pytest
+    depends_on:
+      - db_test
+      - cache_test
+    networks:
+      - test_network
+
+  frontend_test:
+    description: Angular frontend service configured for running UI and end-to-end tests
+    build:
+      context: ./src/web
+      dockerfile: Dockerfile
+      target: builder
+      args:
+        NODE_ENV: testing
+    volumes:
+      - ./src/web:/app
+      - node_modules_test:/app/node_modules
+    environment:
+      NODE_ENV: testing
+      API_URL: http://backend_test:5000/api
+      CYPRESS_BASE_URL: http://localhost:4200
+    command: npm run test
+    depends_on:
+      - backend_test
+    networks:
+      - test_network
+
+  db_test:
+    description: PostgreSQL database service configured for testing with ephemeral storage
+    image: postgres:15.3 # postgres version specified in JSON
+    environment:
+      POSTGRES_DB: interaction_test_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - test_network
+
+  cache_test:
+    description: Redis cache service configured for testing
+    image: redis:7.0.12 # redis version specified in JSON
+    ports:
+      - "6380:6379"
+    command: ["redis-server", "--save", "\"\""]
+    tmpfs:
+      - /data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      - test_network
+
+  cypress:
+    description: Cypress service for running end-to-end tests against the frontend
+    image: cypress/included:12.14.0 # cypress version specified in JSON
+    depends_on:
+      - frontend_test
+    environment:
+      CYPRESS_baseUrl: http://frontend_test:4200
+    volumes:
+      - ./src/web:/app
+      - ./src/web/cypress:/app/cypress
+    working_dir: /app
+    command: cypress run
+    networks:
+      - test_network
+
+volumes:
+  node_modules_test:
+    description: Volume for Node.js dependencies in testing environment
+
+networks:
+  test_network:
+    description: Isolated network for testing environment services
+    driver: bridge
