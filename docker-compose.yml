@@ -1,0 +1,106 @@
+version: '3.8' # version specified in JSON file
+
+services:
+  backend: # Flask API backend service providing the business logic and data access for the Interaction Management System
+    description: Flask API backend service providing the business logic and data access for the Interaction Management System
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile # Defines how the backend service container is built
+      args:
+        APP_ENV: production
+    environment:
+      FLASK_ENV: production
+      LOG_LEVEL: INFO
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db:5432/interaction_db
+      REDIS_URL: redis://:${REDIS_PASSWORD}@cache:6379/0
+      AUTH0_DOMAIN: ${AUTH0_DOMAIN}
+      AUTH0_API_AUDIENCE: ${AUTH0_API_AUDIENCE}
+      AUTH0_ISSUER: ${AUTH0_ISSUER}
+      CORS_ALLOWED_ORIGINS: https://${DOMAIN_NAME}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - db
+      - cache
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - app_network
+
+  frontend: # Angular frontend web application served by Nginx for the Interaction Management System
+    description: Angular frontend web application served by Nginx for the Interaction Management System
+    build:
+      context: ./src/web
+      dockerfile: Dockerfile # Defines how the frontend service container is built
+      args:
+        NODE_ENV: production
+        API_URL: ${API_URL}
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - app_network
+
+  db: # PostgreSQL database service for storing application data
+    description: PostgreSQL database service for storing application data
+    image: postgres:15.3 # postgres version specified in JSON file
+    environment:
+      POSTGRES_DB: interaction_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: always
+    networks:
+      - app_network
+
+  cache: # Redis cache service for performance optimization and session storage
+    description: Redis cache service for performance optimization and session storage
+    image: redis:7.0.12 # redis version specified in JSON file
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: always
+    networks:
+      - app_network
+
+volumes:
+  postgres_data: # Persistent volume for PostgreSQL database storage
+    description: Persistent volume for PostgreSQL database storage
+  redis_data: # Persistent volume for Redis cache data
+    description: Persistent volume for Redis cache data
+
+networks:
+  app_network: # Internal network for connecting application services
+    description: Internal network for connecting application services
+    driver: bridge
