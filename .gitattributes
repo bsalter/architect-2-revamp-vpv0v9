@@ -1,0 +1,56 @@
+* text=auto
+
+# Declare files that will always have LF line endings on checkout
+*.sh text eol=lf
+*.bash text eol=lf
+*.py text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+Dockerfile text eol=lf
+*.dockerignore text eol=lf
+docker-compose*.yml text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.xml text eol=lf
+*.ini text eol=lf
+*.conf text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.csv text eol=lf
+*.tf text eol=lf
+
+# Denote all files that are truly binary and should not be modified
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.mov binary
+*.mp4 binary
+*.mp3 binary
+*.flv binary
+*.fla binary
+*.swf binary
+*.gz binary
+*.zip binary
+*.7z binary
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+*.pyc binary
+*.pdf binary
+
+# Exclude files/directories when creating archives
+.github export-ignore
+/infrastructure/terraform/environments/dev export-ignore
+/infrastructure/terraform/environments/staging export-ignore
+/src/backend/tests export-ignore
+/src/web/cypress export-ignore
