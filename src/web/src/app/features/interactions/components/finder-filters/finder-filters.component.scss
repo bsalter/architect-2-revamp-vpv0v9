@@ -1,0 +1,267 @@
+// Main filter panel container - appears as an overlay
+.filter-panel {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 100%;
+  max-width: 600px;
+  background-color: $surface;
+  border-radius: $border-radius-lg;
+  box-shadow: $shadow-lg;
+  z-index: $z-index-dropdown;
+  margin-top: $spacing-1;
+  border: 1px solid $border;
+  overflow: hidden;
+}
+
+// Header section with title and close button
+.filter-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-3 $spacing-4;
+  background-color: $background;
+  border-bottom: 1px solid $border;
+  font-weight: $font-weight-semibold;
+  color: $text-primary;
+}
+
+// Close button (X) in the header
+.close-button {
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  line-height: 1;
+  padding: $spacing-1;
+  cursor: pointer;
+  color: $text-secondary;
+  transition: $transition-base;
+  
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+// Main content area containing filter controls
+.filter-content {
+  padding: $spacing-4;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+// Container for a single filter criterion
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $spacing-2;
+  margin-bottom: $spacing-3;
+  align-items: center;
+}
+
+// Field selection dropdown container
+.filter-field {
+  flex: 2 1 150px;
+}
+
+// Operator selection dropdown container
+.filter-operator {
+  flex: 1 1 120px;
+}
+
+// Value input container
+.filter-value {
+  flex: 2 1 150px;
+}
+
+// Container for second value when using BETWEEN operator
+.filter-to-value {
+  display: flex;
+  align-items: center;
+  flex: 2 1 170px;
+  gap: $spacing-2;
+  
+  span {
+    white-space: nowrap;
+    font-size: $font-size-sm;
+    color: $text-secondary;
+  }
+  
+  input {
+    flex: 1;
+  }
+}
+
+// Container for action buttons within a filter row
+.filter-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+// Button to remove a filter criterion
+.remove-filter {
+  border: none;
+  background-color: transparent;
+  color: $text-secondary;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: $spacing-1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: $transition-base;
+  
+  &:hover {
+    color: $danger;
+  }
+}
+
+// Container for the add filter button
+.add-filter {
+  margin-top: $spacing-2;
+  margin-bottom: $spacing-4;
+  
+  button {
+    background-color: transparent;
+    border: 1px dashed $border;
+    color: $primary;
+    padding: $spacing-2 $spacing-3;
+    border-radius: $border-radius-md;
+    width: 100%;
+    text-align: center;
+    cursor: pointer;
+    transition: $transition-base;
+    
+    &:hover {
+      background-color: rgba($primary, 0.05);
+    }
+  }
+}
+
+// Footer with action buttons
+.filter-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-3;
+  padding: $spacing-3 $spacing-4;
+  border-top: 1px solid $border;
+  background-color: $background;
+}
+
+// Button to clear all filters
+.btn-clear {
+  background-color: transparent;
+  border: 1px solid $border;
+  color: $text-secondary;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: $input-disabled-background;
+  }
+}
+
+// Button to apply filters
+.btn-apply {
+  background-color: $primary;
+  border: none;
+  color: white;
+  padding: $spacing-2 $spacing-4;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: $primary-dark;
+  }
+}
+
+// Button to toggle filter panel visibility
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: $spacing-2;
+  background-color: $surface;
+  border: 1px solid $border;
+  padding: $spacing-2 $spacing-3;
+  border-radius: $border-radius-md;
+  cursor: pointer;
+  transition: $transition-base;
+  
+  &:hover {
+    background-color: $background;
+  }
+}
+
+// Badge showing active filter count
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $primary;
+  color: white;
+  border-radius: $border-radius-full;
+  font-size: $font-size-xs;
+  height: 1.25rem;
+  min-width: 1.25rem;
+  padding: 0 $spacing-1;
+}
+
+// Responsive styles for medium screens and below
+@media (max-width: $breakpoint-md) {
+  .filter-panel {
+    max-width: 100%;
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    border-radius: $border-radius-lg $border-radius-lg 0 0;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .filter-content {
+    flex: 1;
+    overflow-y: auto;
+  }
+  
+  .filter-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: $spacing-2;
+  }
+  
+  .filter-field,
+  .filter-operator,
+  .filter-value,
+  .filter-to-value {
+    flex: 1 1 auto;
+  }
+  
+  .filter-to-value {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    span {
+      margin-bottom: $spacing-1;
+    }
+  }
+}
+
+// Responsive styles for small screens
+@media (max-width: $breakpoint-sm) {
+  .filter-panel-footer {
+    flex-direction: column;
+    padding: $spacing-3;
+    
+    .btn-clear,
+    .btn-apply {
+      width: 100%;
+      text-align: center;
+    }
+  }
+}
