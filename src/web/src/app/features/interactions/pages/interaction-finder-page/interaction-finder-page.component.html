@@ -1,0 +1,76 @@
+<div class="interaction-finder-container">
+  <!-- Header with breadcrumb and page title -->
+  <header class="interaction-finder-header">
+    <app-breadcrumb></app-breadcrumb>
+    <div class="page-title-container">
+      <h1>Interactions</h1>
+      <button type="button" class="btn btn-primary create-btn" (click)="onCreateInteraction()">+ New</button>
+    </div>
+  </header>
+
+  <!-- Search and filter controls -->
+  <div class="search-filter-container">
+    <div class="search-container">
+      <app-search-input 
+        [searchTerm]="searchTerm"
+        placeholder="Search interactions..."
+        (search)="onSearch()"
+        (cleared)="clearAllFilters()">
+      </app-search-input>
+    </div>
+    <div class="filter-container">
+      <button type="button" class="btn btn-outline-secondary filter-btn" 
+              (click)="toggleFilters()" 
+              [ngClass]="{'active': showFilters}">
+        <span>Filters</span>
+        <span class="filter-count" *ngIf="activeFiltersCount > 0">{{activeFiltersCount}}</span>
+      </button>
+      <button type="button" class="btn btn-outline-secondary refresh-btn" (click)="refreshData()">
+        ↻ Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Advanced filters panel (conditionally shown) -->
+  <app-finder-filters 
+    *ngIf="showFilters"
+    [filters]="activeFilters"
+    (filtersChange)="onFiltersChanged($event)"
+    (filterPanelClosed)="onFilterPanelClosed()">
+  </app-finder-filters>
+
+  <!-- Active filters bar (conditionally shown) -->
+  <div class="active-filters-bar" *ngIf="hasActiveFilters()">
+    <span class="filter-label">Active filters:</span>
+    <span class="filter-chip" *ngIf="searchTerm">
+      <span class="chip-text">"{{searchTerm}}"</span>
+    </span>
+    <span class="filter-chip" *ngIf="activeFiltersCount > 0">
+      <span class="chip-text">{{activeFiltersCount}} filter(s)</span>
+    </span>
+    <button type="button" class="btn btn-link clear-filters-btn" (click)="clearAllFilters()">
+      Clear All
+    </button>
+  </div>
+
+  <!-- Results table container -->
+  <div class="table-container">
+    <!-- Loading indicator shown during data retrieval -->
+    <app-loading-indicator *ngIf="isLoading"></app-loading-indicator>
+    
+    <!-- Results table (conditional on not loading) -->
+    <app-finder-table
+      *ngIf="!isLoading"
+      [searchResults]="searchResults"
+      (viewInteraction)="onInteractionSelected($event)"
+      (editInteraction)="onEditInteraction($event)"
+      (deleteInteraction)="onDeleteInteraction($event)">
+    </app-finder-table>
+  </div>
+
+  <!-- No results message (conditional) -->
+  <div class="no-results" *ngIf="!isLoading && searchResults?.items?.length === 0">
+    <p>No interactions found. Try adjusting your search or filters.</p>
+    <button type="button" class="btn btn-link" (click)="clearAllFilters()">Clear Filters</button>
+  </div>
+</div>
